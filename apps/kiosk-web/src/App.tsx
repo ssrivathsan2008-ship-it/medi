@@ -4,6 +4,8 @@ import {
   getSession, 
   updateSession, 
   uploadDocument, 
+  triggerRedflag,
+  ackRedflag,
   PatientData 
 } from './api';
 
@@ -248,6 +250,11 @@ export default function App() {
   const [isSupportOpen, setIsSupportOpen] = useState<boolean>(false);
   const [isAddingRx, setIsAddingRx] = useState<boolean>(false);
   const [isAlertActive, setIsAlertActive] = useState<boolean>(false);
+  const [consultType, setConsultType] = useState<string>("allopathic");
+  const [isPushToTalk, setIsPushToTalk] = useState<boolean>(false);
+  const [isSuppressionActive, setIsSuppressionActive] = useState<boolean>(true);
+  const [activeAlerts, setActiveAlerts] = useState<any[]>([]);
+
 
   // Form states for manually registering a new patient
   const [newName, setNewName] = useState("");
@@ -265,11 +272,89 @@ export default function App() {
 
   const activeTranslations = translations[lang] || translations.en;
 
+  // Connect to Red-Flag Triage WebSocket
+  useEffect(() => {
+    let ws: WebSocket | null = null;
+    let reconnectTimeout: any = null;
+
+    const connectWebSocket = () => {
+      try {
+        const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const wsHost = window.location.hostname ? `${window.location.hostname}:8000` : "localhost:8000";
+        ws = new WebSocket(`${wsProtocol}//${wsHost}/redflag/subscribe`);
+        
+        ws.onopen = () => {
+          console.log("Connected to Red-Flag Triage WebSocket");
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === "red_flag_alert") {
+              setActiveAlerts(prev => {
+                if (prev.some(alert => alert.session_id === data.session_id)) return prev;
+                return [...prev, data];
+              });
+              // Trigger emergency alarm audio beep sequence
+              ie.playBeep("success");
+            } else if (data.type === "red_flag_ack") {
+              setActiveAlerts(prev => prev.filter(alert => alert.session_id !== data.session_id));
+            }
+          } catch (e) {
+            console.error("Error parsing WebSocket message:", e);
+          }
+        };
+
+        ws.onclose = () => {
+          reconnectTimeout = setTimeout(connectWebSocket, 3000);
+        };
+
+        ws.onerror = (err) => {
+          ws?.close();
+        };
+      } catch (err) {
+        reconnectTimeout = setTimeout(connectWebSocket, 3000);
+      }
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (ws) {
+        ws.onclose = null;
+        ws.close();
+      }
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+    };
+  }, []);
+
+  // Poll session status for Kiosk when emergency hold is active
+  useEffect(() => {
+    if (!isAlertActive || !patient) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const updatedSession = await getSession(patient.id);
+        if (updatedSession.status === "acknowledged") {
+          setIsAlertActive(false);
+          setScreen("converse"); // Return to conversation
+          setPatient(updatedSession);
+        }
+      } catch (err) {
+        console.error("Failed to fetch session status during emergency hold:", err);
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isAlertActive, patient]);
+
+
   // Initialize patient state from backend when session starts
   const handleStartSession = async (abhaId?: string, name?: string, age?: number, gender?: string, phone?: string) => {
     try {
       const data = await startSession(abhaId, name, age, gender, phone);
-      setPatient(data);
+      const updated = await updateSession(data.id, { consultType });
+      setPatient(updated);
       setScreen("identify");
     } catch (err) {
       console.error(err);
@@ -299,27 +384,58 @@ export default function App() {
     setTimeout(() => {
       let speech = "";
       const step = patient?.currentStep || 1;
-      if (step === 1) speech = activeTranslations.fallbackChiefComplaint;
-      else if (step === 2) speech = activeTranslations.fallbackPastHistory;
-      else if (step === 3) speech = activeTranslations.fallbackFamilyHistory;
-      else if (step === 4) speech = activeTranslations.fallbackLifestyle;
+      
+      if (consultType === "ayush") {
+        const ayushFallbacks = [
+          "Constitutional body type: Vata-dominant. Shows qualities of dry skin, lighter build, and active mind.",
+          "Currently experiencing Pitta dosha imbalance with stomach heat and acidity.",
+          "Excellent blood and muscle tissue quality (Rakta-Mamsa Sara), healthy complexion.",
+          "Compact and symmetric body build, well-knit joints.",
+          "Body proportions are balanced and symmetric according to standard measurement scales.",
+          "Adaptable to warm weather, light diets, rice, and cooling herbs.",
+          "Strong mental strength, high tolerance to pain and stress, good emotional stability.",
+          "Strong digestive capacity (Agni), consumes two balanced meals daily without discomfort.",
+          "Excellent physical stamina, exercises daily (yoga) with quick recovery.",
+          "Middle age (45 years old), constitutional transition period, symptoms match age profile.",
+          "Follows a balanced vegetarian diet, sleeps 7 hours, works regular shifts."
+        ];
+        speech = ayushFallbacks[step - 1] || "No concerns reported.";
+      } else {
+        if (step === 1) speech = activeTranslations.fallbackChiefComplaint;
+        else if (step === 2) speech = activeTranslations.fallbackPastHistory;
+        else if (step === 3) speech = activeTranslations.fallbackFamilyHistory;
+        else if (step === 4) speech = activeTranslations.fallbackLifestyle;
+      }
 
       setVoiceText(speech);
       setIsRecording(false);
       ie.playBeep("success");
 
       // Save voice details directly to backend database
-      if (step === 1) {
+      if (consultType === "ayush") {
+        const parameterNames = [
+          "Prakriti", "Vikriti", "Sara", "Samhanana", "Pramana", 
+          "Satmya", "Sattva", "Ahara Shakti", "Vyayama Shakti", "Vaya", "Ahara-Vihara"
+        ];
+        const paramName = parameterNames[step - 1] || "Parameter";
+        const newDetails = { ...(patient?.ayushDetails || {}), [paramName]: speech };
         syncPatientChange({
-          symptoms: Array.from(new Set([...(patient?.symptoms || []), "Fever (2 Days)", "Stomach Pain"])),
-          chiefComplaintDetails: speech
+          ayushDetails: newDetails,
+          chiefComplaintDetails: `AYUSH Intake Complete. Captured Prakriti, Vikriti, Sara, Samhanana, Pramana, Satmya, Sattva, Ahara/Vyayama Shakti, Vaya, and Ahara-Vihara.`
         });
-      } else if (step === 2) {
-        syncPatientChange({ pastHistoryDetails: speech });
-      } else if (step === 3) {
-        syncPatientChange({ familyHistoryDetails: speech });
-      } else if (step === 4) {
-        syncPatientChange({ lifestyleDetails: speech });
+      } else {
+        if (step === 1) {
+          syncPatientChange({
+            symptoms: Array.from(new Set([...(patient?.symptoms || []), "Fever (2 Days)", "Stomach Pain"])),
+            chiefComplaintDetails: speech
+          });
+        } else if (step === 2) {
+          syncPatientChange({ pastHistoryDetails: speech });
+        } else if (step === 3) {
+          syncPatientChange({ familyHistoryDetails: speech });
+        } else if (step === 4) {
+          syncPatientChange({ lifestyleDetails: speech });
+        }
       }
     }, 2800);
   };
@@ -395,12 +511,26 @@ export default function App() {
               </span>
             </>
           )}
+          {screen === "triage" && (
+            <>
+              <div className="h-4 w-px bg-white/20 mx-2" />
+              <span className="text-xs uppercase tracking-[0.2em] font-semibold text-[#DBA226] bg-[#DBA226]/10 px-2.5 py-1 rounded border border-[#DBA226]/30">
+                Triage Console
+              </span>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
           <button 
+            onClick={() => setScreen(prev => prev === "triage" ? "identify" : "triage")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] uppercase tracking-[0.15em] font-bold border border-[#F2F0ED]/20 transition-colors ${screen === "triage" ? "bg-[#DBA226] text-white" : "bg-[#2A2A2A] hover:bg-[#DBA226] text-white"}`}
+          >
+            {screen === "triage" ? "Kiosk View" : "Triage Console"}
+          </button>
+          <button 
             onClick={() => setScreen(prev => prev === "physician" ? "identify" : "physician")}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] uppercase tracking-[0.15em] font-bold border border-[#F2F0ED]/20 bg-[#2A2A2A] hover:bg-[#D14D2A] text-white transition-colors"
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] uppercase tracking-[0.15em] font-bold border border-[#F2F0ED]/20 transition-colors ${screen === "physician" ? "bg-[#D14D2A] text-white" : "bg-[#2A2A2A] hover:bg-[#D14D2A] text-white"}`}
           >
             {screen === "physician" ? "Kiosk View" : "Physician View"}
           </button>
@@ -417,7 +547,7 @@ export default function App() {
       <div className="flex flex-1 overflow-hidden relative">
         
         {/* Navigation Sidebar */}
-        {screen !== "language" && screen !== "physician" && (
+        {screen !== "language" && screen !== "consult_type_select" && screen !== "triage" && screen !== "physician" && (
           <nav className="bg-[#EBE8E3] text-[#1A1A1A] w-64 border-r border-[#1A1A1A]/10 flex flex-col h-full py-6 px-4 shrink-0 shadow-2xs">
             <div className="mb-8 flex flex-col items-center text-center pb-5 border-b border-[#1A1A1A]/10">
               <div className="w-12 h-12 bg-white rounded-full mb-3 flex items-center justify-center border border-[#1A1A1A]/15 shadow-xs">
@@ -447,7 +577,16 @@ export default function App() {
             </ul>
             
             <button 
-              onClick={() => setIsAlertActive(true)}
+              onClick={async () => {
+                setIsAlertActive(true);
+                if (patient) {
+                  try {
+                    await triggerRedflag(patient.id, "Emergency Button Pressed on Kiosk Dashboard");
+                  } catch (err) {
+                    console.error("Failed to trigger emergency in BFF:", err);
+                  }
+                }
+              }}
               className="mt-auto h-12 bg-[#D14D2A] text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-[#B83E1E] transition-all border border-[#B83E1E]"
             >
               {activeTranslations.emergencyHelp}
@@ -468,7 +607,7 @@ export default function App() {
                     key={l.code}
                     onClick={() => {
                       setLang(l.code);
-                      handleStartSession(undefined, "John Doe", 45, "Male", "9876543210");
+                      setScreen("consult_type_select");
                     }}
                     className="p-5 bg-white border border-[#1A1A1A]/10 rounded-xl hover:border-[#D14D2A] hover:bg-[#FAF8F5] transition-all text-left shadow-2xs"
                   >
@@ -476,6 +615,46 @@ export default function App() {
                     <div className="text-xs text-[#5C5852] mt-1">{l.englishName}</div>
                   </button>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* SCREEN 1.5: Consult Type Select */}
+          {screen === "consult_type_select" && (
+            <div className="flex flex-col items-center justify-center my-auto w-full max-w-2xl mx-auto animate-fadeIn">
+              <h1 className="text-2xl md:text-3xl font-bold font-serif mb-2 text-center">Select Clinical Intake Mode</h1>
+              <p className="text-xs text-[#5C5852] mb-8 text-center">Choose the diagnostic pathway for this session.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                <button 
+                  onClick={() => {
+                    setConsultType("allopathic");
+                    handleStartSession(undefined, "John Doe", 45, "Male", "9876543210");
+                  }}
+                  className="p-6 bg-white border border-[#1A1A1A]/10 rounded-2xl hover:border-[#D14D2A] hover:bg-[#FAF8F5] transition-all text-left shadow-xs flex flex-col justify-between h-52 group"
+                >
+                  <div>
+                    <div className="text-xl font-bold font-serif text-[#1A1A1A] group-hover:text-[#D14D2A]">Allopathic Clinical Intake</div>
+                    <div className="text-xs text-[#5C5852] mt-2 leading-relaxed">
+                      Standard Western medicine pathway focusing on Chief Complaint, Past History, Family History, and Lifestyle.
+                    </div>
+                  </div>
+                  <div className="text-xs font-bold text-[#D14D2A] uppercase tracking-wider mt-4">Select Pathway →</div>
+                </button>
+                <button 
+                  onClick={() => {
+                    setConsultType("ayush");
+                    handleStartSession(undefined, "John Doe", 45, "Male", "9876543210");
+                  }}
+                  className="p-6 bg-white border border-[#1A1A1A]/10 rounded-2xl hover:border-[#D14D2A] hover:bg-[#FAF8F5] transition-all text-left shadow-xs flex flex-col justify-between h-52 group"
+                >
+                  <div>
+                    <div className="text-xl font-bold font-serif text-[#D14D2A]">AYUSH Ayurveda Intake</div>
+                    <div className="text-xs text-[#5C5852] mt-2 leading-relaxed">
+                      Holistic Ayurvedic pathway capturing all 10 Dashavidha Pariksha parameters (Prakriti, Vikriti, Sara...) and Ahara-Vihara.
+                    </div>
+                  </div>
+                  <div className="text-xs font-bold text-[#D14D2A] uppercase tracking-wider mt-4">Select Pathway →</div>
+                </button>
               </div>
             </div>
           )}
@@ -522,48 +701,97 @@ export default function App() {
           )}
 
           {/* SCREEN 3: Converse (Voice Intake) */}
-          {screen === "converse" && (
-            <div className="w-full max-w-3xl mx-auto flex flex-col items-center gap-6">
-              <h1 className="text-2xl md:text-3xl font-bold font-serif text-center">
-                {patient?.currentStep === 1 ? activeTranslations.healthConcernTitle 
-                  : patient?.currentStep === 2 ? "Any Past Medical Conditions?" 
-                  : patient?.currentStep === 3 ? "Any Family Health History?" 
-                  : "Lifestyle & Daily Habits"}
-              </h1>
-              
-              <button 
-                onClick={handleSpeech}
-                className={`w-32 h-32 md:w-36 md:h-36 rounded-full flex items-center justify-center transition-all border-2 shadow-lg ${isRecording ? "bg-[#D14D2A] text-white ring-8 ring-[#D14D2A]/20 scale-105" : "bg-[#1A1A1A] text-white"}`}
-              >
-                🎤
-              </button>
-              <span className="text-xs font-bold uppercase tracking-wider">
-                {isRecording ? activeTranslations.listening : activeTranslations.tapToSpeak}
-              </span>
+          {screen === "converse" && (() => {
+            const ayushQuestions = [
+              { param: "Prakriti (Constitution)", q: "What is your constitutional body type or predominant energy (Vata, Pitta, Kapha)?" },
+              { param: "Vikriti (Imbalance)", q: "Are you currently experiencing any digestive or metabolic imbalances?" },
+              { param: "Sara (Tissue Quality)", q: "How would you describe the general quality of your skin, hair, and nails (tissue quality)?" },
+              { param: "Samhanana (Compactness)", q: "How is your overall body build and compactness?" },
+              { param: "Pramana (Proportions)", q: "Are your body proportions normal and symmetric?" },
+              { param: "Satmya (Adaptability)", q: "What foods, climates, or habits are highly suitable for your body?" },
+              { param: "Sattva (Mental Strength)", q: "How do you rate your mental strength and resilience under stress?" },
+              { param: "Ahara Shakti (Digestion)", q: "Describe your appetite and digestion capacity." },
+              { param: "Vyayama Shakti (Physical Energy)", q: "Describe your physical energy and exercise capacity." },
+              { param: "Vaya (Age Factors)", q: "Are your symptoms related to your current stage of life/age?" },
+              { param: "Ahara-Vihara (Diet & Lifestyle)", q: "Describe your daily diet and lifestyle habits." }
+            ];
+            const step = patient?.currentStep || 1;
+            const isAyush = consultType === "ayush";
+            const currentQ = isAyush ? ayushQuestions[step - 1] : null;
 
-              {voiceText && (
-                <div className="w-full bg-white border border-[#1A1A1A]/12 p-4 rounded-xl shadow-2xs">
-                  <div className="text-[10px] font-bold text-[#5C5852] uppercase tracking-wider mb-1">Captured Speech</div>
-                  <p className="text-sm italic font-medium">"{voiceText}"</p>
+            return (
+              <div className="w-full max-w-3xl mx-auto flex flex-col items-center gap-6 animate-fadeIn">
+                <div className="text-center space-y-2">
+                  <span className="text-[10px] bg-[#D14D2A]/10 text-[#D14D2A] px-2.5 py-1 rounded-full font-bold uppercase tracking-widest border border-[#D14D2A]/20">
+                    {isAyush ? `AYUSH Assessment • Step ${step} of 11` : `Allopathic Intake • Step ${step} of 4`}
+                  </span>
+                  <h1 className="text-2xl md:text-3xl font-bold font-serif text-center mt-2">
+                    {isAyush ? currentQ?.param : (
+                      step === 1 ? activeTranslations.healthConcernTitle 
+                        : step === 2 ? "Any Past Medical Conditions?" 
+                        : step === 3 ? "Any Family Health History?" 
+                        : "Lifestyle & Daily Habits"
+                    )}
+                  </h1>
+                  <p className="text-sm text-[#5C5852] italic max-w-lg mx-auto">
+                    {isAyush ? currentQ?.q : activeTranslations.healthConcernSubtitle}
+                  </p>
                 </div>
-              )}
 
-              <button 
-                onClick={() => {
-                  const nextStep = (patient?.currentStep || 1) + 1;
-                  if (nextStep > 4) {
-                    setScreen("scan");
-                  } else {
-                    syncPatientChange({ currentStep: nextStep });
-                    setVoiceText("");
-                  }
-                }}
-                className="mt-6 px-6 h-11 bg-[#D14D2A] hover:bg-[#B83E1E] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-xs"
-              >
-                Next Step →
-              </button>
-            </div>
-          )}
+                {/* Noise-Robust Client-side Audio Controls */}
+                <div className="flex gap-3 text-[10px] font-bold uppercase tracking-wider">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-[#34A853]/10 text-[#34A853] border-[#34A853]/20 shadow-3xs">
+                    <span className="w-2 h-2 rounded-full bg-[#34A853] animate-pulse" />
+                    WebRTC RNNoise Active
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setIsPushToTalk(prev => !prev);
+                      if (isRecording) setIsRecording(false);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg border transition-all ${isPushToTalk ? "bg-[#D14D2A]/10 text-[#D14D2A] border-[#D14D2A]/20" : "bg-[#FAF8F5] text-[#5C5852] border-[#1A1A1A]/10"}`}
+                  >
+                    Mode: {isPushToTalk ? "Push-to-Talk" : "Tap-to-Talk"}
+                  </button>
+                </div>
+                
+                <button 
+                  onMouseDown={() => { if (isPushToTalk) handleSpeech(); }}
+                  onMouseUp={() => { if (isPushToTalk && isRecording) handleSpeech(); }}
+                  onClick={() => { if (!isPushToTalk) handleSpeech(); }}
+                  className={`w-32 h-32 md:w-36 md:h-36 rounded-full flex items-center justify-center transition-all border-2 shadow-lg ${isRecording ? "bg-[#D14D2A] text-white ring-8 ring-[#D14D2A]/20 scale-105" : "bg-[#1A1A1A] text-white hover:bg-[#2A2A2A]"}`}
+                >
+                  <span className="text-3xl">🎤</span>
+                </button>
+                <span className="text-xs font-bold uppercase tracking-wider text-[#5C5852]">
+                  {isPushToTalk ? (isRecording ? "Release to Send" : "Hold to Speak") : (isRecording ? activeTranslations.listening : activeTranslations.tapToSpeak)}
+                </span>
+
+                {voiceText && (
+                  <div className="w-full bg-white border border-[#1A1A1A]/12 p-4 rounded-xl shadow-2xs">
+                    <div className="text-[10px] font-bold text-[#5C5852] uppercase tracking-wider mb-1">Captured Audio Transcript</div>
+                    <p className="text-sm italic font-medium">"{voiceText}"</p>
+                  </div>
+                )}
+
+                <button 
+                  onClick={() => {
+                    const nextStep = (patient?.currentStep || 1) + 1;
+                    const maxSteps = isAyush ? 11 : 4;
+                    if (nextStep > maxSteps) {
+                      setScreen("scan");
+                    } else {
+                      syncPatientChange({ currentStep: nextStep });
+                      setVoiceText("");
+                    }
+                  }}
+                  className="mt-6 px-6 h-11 bg-[#D14D2A] hover:bg-[#B83E1E] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-xs transition-colors"
+                >
+                  Next Step →
+                </button>
+              </div>
+            );
+          })()}
 
           {/* SCREEN 4: Scan */}
           {screen === "scan" && (
@@ -647,6 +875,11 @@ export default function App() {
                       <span className="px-2 py-0.5 rounded bg-[#EBE8E3] text-xs font-bold font-mono">
                         {patient.id}
                       </span>
+                      {patient.documents?.some(d => d.url.includes("purged")) && (
+                        <span className="px-2 py-0.5 rounded bg-[#34A853]/10 text-[#34A853] text-[9px] uppercase font-bold tracking-wider border border-[#34A853]/20 animate-pulse">
+                          🔐 DPDP Data Minimized (Raw files purged)
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-[#5C5852] mt-1">
                       {patient.gender || "Male"} • {patient.age || 45} y/o • DOB: {patient.dob} • ABHA: {patient.abhaId}
@@ -804,6 +1037,24 @@ export default function App() {
                     </div>
                   </div>
 
+                  {/* AYUSH Dashavidha Pariksha Summary */}
+                  {patient.consultType === "ayush" && (
+                    <div className="bg-white border border-[#1A1A1A]/12 rounded-2xl p-5 shadow-2xs animate-fadeIn">
+                      <h2 className="text-sm font-bold uppercase tracking-wider mb-3 text-[#D14D2A]">AYUSH Dashavidha Pariksha</h2>
+                      <div className="space-y-3 text-xs">
+                        {Object.entries(patient.ayushDetails || {}).map(([param, val]) => (
+                          <div key={param} className="p-3 bg-[#FAF8F5] rounded-xl border">
+                            <span className="font-bold text-[10px] uppercase block mb-1 text-[#D14D2A]">{param}</span>
+                            <p className="text-[#5C5852] leading-relaxed">{val}</p>
+                          </div>
+                        ))}
+                        {Object.keys(patient.ayushDetails || {}).length === 0 && (
+                          <p className="text-xs text-[#8C877E] italic">No parameters captured.</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Document Timeline (Dynamic Mapping) */}
                   <div className="bg-white border border-[#1A1A1A]/12 rounded-2xl p-5 shadow-2xs">
                     <h2 className="text-sm font-bold uppercase tracking-wider mb-4">Document Timeline</h2>
@@ -823,6 +1074,65 @@ export default function App() {
 
               </div>
 
+            </div>
+          )}
+
+          {/* SCREEN 7: Triage Alert Console */}
+          {screen === "triage" && (
+            <div className={`w-full max-w-5xl mx-auto flex flex-col gap-6 h-full p-6 rounded-3xl transition-all ${activeAlerts.length > 0 ? "animate-pulse border-4 border-[#BA1A1A] bg-[#BA1A1A]/5 shadow-lg" : "bg-white border shadow-2xs"}`}>
+              <div className="flex items-center justify-between border-b pb-4">
+                <div>
+                  <h1 className="text-2xl font-bold font-serif text-[#1A1A1A] flex items-center gap-2">
+                    🚨 Nurse Triage Alert Console
+                  </h1>
+                  <p className="text-xs text-[#5C5852] mt-1">Real-time emergency tracking for OPD Kiosks via WebSockets.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#34A853] animate-pulse" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#34A853]">Live Connected</span>
+                </div>
+              </div>
+
+              {activeAlerts.length === 0 ? (
+                <div className="my-auto flex flex-col items-center justify-center text-center p-12">
+                  <span className="text-4xl mb-4">✅</span>
+                  <h3 className="text-lg font-bold font-serif text-[#1A1A1A]">No Active Emergency Alerts</h3>
+                  <p className="text-xs text-[#5C5852] mt-1 max-w-sm">All kiosks are currently running normal intake sessions.</p>
+                </div>
+              ) : (
+                <div className="space-y-4 overflow-y-auto max-h-[500px]">
+                  {activeAlerts.map(alert => (
+                    <div key={alert.session_id} className="p-6 bg-white border border-[#BA1A1A]/30 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-md animate-fadeIn bg-gradient-to-r from-red-50 to-white">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                          <span className="px-2.5 py-0.5 bg-[#BA1A1A] text-white text-[10px] font-bold rounded font-mono uppercase">
+                            {alert.kiosk_id}
+                          </span>
+                          <span className="font-bold text-sm text-[#1A1A1A]">Patient: {alert.patient_name}</span>
+                        </div>
+                        <div className="text-xs text-[#5C5852]">Session ID: <span className="font-mono font-bold text-[#1A1A1A]">{alert.session_id}</span></div>
+                        <div className="text-sm font-bold text-[#BA1A1A] mt-2 flex items-center gap-1.5 animate-pulse">
+                          ⚠️ Primary Symptom: {alert.symptom}
+                        </div>
+                      </div>
+                      <button 
+                        onClick={async () => {
+                          try {
+                            await ackRedflag(alert.session_id);
+                            setActiveAlerts(prev => prev.filter(item => item.session_id !== alert.session_id));
+                            ie.playBeep("success");
+                          } catch (err) {
+                            console.error("Failed to acknowledge redflag:", err);
+                          }
+                        }}
+                        className="w-full md:w-auto px-6 py-3 bg-[#BA1A1A] hover:bg-[#A61717] text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm transition-all"
+                      >
+                        Acknowledge & Release Kiosk
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -999,21 +1309,24 @@ export default function App() {
 
       {/* MODAL: Emergency priorities alert notification panel */}
       {isAlertActive && (
-        <div className="fixed inset-0 z-[100] bg-[#BA1A1A] text-white flex flex-col justify-between p-8 select-none">
-          <div className="text-center my-auto max-w-xl mx-auto space-y-6">
+        <div className="fixed inset-0 z-[100] bg-[#BA1A1A] text-white flex flex-col justify-center p-8 select-none animate-fadeIn">
+          <div className="text-center max-w-xl mx-auto space-y-6">
             <div className="w-24 h-24 rounded-full bg-white text-[#BA1A1A] text-4xl flex items-center justify-center mx-auto shadow-2xl animate-bounce">
               ⚠️
             </div>
             <h1 className="text-3xl md:text-4xl font-bold font-serif">{activeTranslations.nurseAlertTitle}</h1>
             <p className="text-lg text-white/90 font-medium">{activeTranslations.nurseAlertSubtitle}</p>
             <p className="text-xs text-white/75">{activeTranslations.alertSentNotice}</p>
+            
+            <div className="pt-8 border-t border-white/20 mt-8 space-y-2">
+              <p className="text-sm font-semibold tracking-wide text-white/85 animate-pulse">
+                🔴 Waiting for Triage Nurse to Acknowledge & Release this Kiosk...
+              </p>
+              <p className="text-xs font-mono text-white/60">
+                Kiosk ID: Kiosk-01 • Session ID: {patient?.id || "N/A"}
+              </p>
+            </div>
           </div>
-          <button 
-            onClick={() => setIsAlertActive(false)}
-            className="w-full max-w-xs mx-auto py-3 bg-white text-[#BA1A1A] font-bold text-xs uppercase tracking-wider rounded-xl shadow-md"
-          >
-            {activeTranslations.dismissEmergency}
-          </button>
         </div>
       )}
 

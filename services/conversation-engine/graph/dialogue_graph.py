@@ -19,8 +19,32 @@ class DialogueGraph:
                 "Is it worse in the morning or after physical activity?"
             ]
         }
+        
+        # AYUSH Dashavidha Pariksha clinical ontology
+        self.ayush_ontologies = [
+            ("Prakriti", "What is your constitutional body type or predominant energy (Vata, Pitta, Kapha)?"),
+            ("Vikriti", "Are you currently experiencing any digestive or metabolic imbalances?"),
+            ("Sara", "How would you describe the general quality of your skin, hair, and nails (tissue quality)?"),
+            ("Samhanana", "How is your overall body build and compactness?"),
+            ("Pramana", "Are your body proportions normal and symmetric?"),
+            ("Satmya", "What foods, climates, or habits are highly suitable for your body?"),
+            ("Sattva", "How do you rate your mental strength and resilience under stress?"),
+            ("Ahara Shakti", "Describe your appetite and digestion capacity."),
+            ("Vyayama Shakti", "Describe your physical energy and exercise capacity."),
+            ("Vaya", "Are your symptoms related to your current stage of life/age?"),
+            ("Ahara-Vihara", "Describe your daily diet and lifestyle habits.")
+        ]
 
-    def get_next_prompt(self, symptoms: List[str], current_step: int) -> Dict[str, str]:
+    def get_next_prompt(self, symptoms: List[str], current_step: int, consult_type: str = "allopathic") -> Dict[str, str]:
+        if consult_type == "ayush":
+            idx = (current_step - 1) % len(self.ayush_ontologies)
+            param, question = self.ayush_ontologies[idx]
+            return {
+                "parameter": param,
+                "question": question,
+                "tts": question
+            }
+
         if not symptoms:
             return {
                 "question": "Could you please tell me your main health concern today?",

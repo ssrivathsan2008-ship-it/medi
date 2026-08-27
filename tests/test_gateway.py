@@ -5,8 +5,8 @@ import time
 BASE_URL = "http://localhost:8000"
 
 def test_health():
-    print("Testing root endpoint...")
-    res = requests.get(f"{BASE_URL}/")
+    print("Testing health endpoint...")
+    res = requests.get(f"{BASE_URL}/api/health")
     assert res.status_code == 200
     assert res.json()["service"] == "MediKiosk API Gateway"
     print("[PASS] Health check passed!")
@@ -95,6 +95,37 @@ def test_document_upload(session_id):
     assert summary_data["timeline"][0]["title"] == "test_prescription.pdf"
     print("[PASS] Document uploaded and timeline linked successfully!")
 
+def test_redflags():
+    print("Testing redflag flows...")
+    payload = {"name": "Test Patient"}
+    res = requests.post(f"{BASE_URL}/session/start", json=payload)
+    assert res.status_code == 200
+    session_id = res.json()["id"]
+
+    payload_trigger = {
+        "session_id": session_id,
+        "symptom": "Severe Chest Pain",
+        "kiosk_id": "Kiosk-01"
+    }
+    res_trigger = requests.post(f"{BASE_URL}/redflag/trigger", json=payload_trigger)
+    assert res_trigger.status_code == 200
+    assert res_trigger.json()["status"] == "success"
+
+    res_session = requests.get(f"{BASE_URL}/summary/{session_id}")
+    assert res_session.json()["status"] == "red_flag"
+    assert res_session.json()["redflagSymptom"] == "Severe Chest Pain"
+
+    payload_ack = {"session_id": session_id}
+    res_ack = requests.post(f"{BASE_URL}/redflag/ack", json=payload_ack)
+    assert res_ack.status_code == 200
+    assert res_ack.json()["status"] == "success"
+
+    res_session_after = requests.get(f"{BASE_URL}/summary/{session_id}")
+    assert res_session_after.json()["status"] == "acknowledged"
+    for doc in res_session_after.json()["documents"]:
+        assert doc["url"] == "/assets/purged.pdf"
+    print("[PASS] Redflag trigger, acknowledge, and data minimization verified successfully!")
+
 if __name__ == "__main__":
     print("--- STARTING METRICS GATEWAY ENDPOINT TESTS ---")
     try:
@@ -102,6 +133,7 @@ if __name__ == "__main__":
         sid_john, sid_sarah = test_session()
         test_summary_and_prescriptions(sid_john)
         test_document_upload(sid_john)
+        test_redflags()
         print("[SUCCESS] ALL ENDPOINT INTEGRATION TESTS PASSED SUCCESSFULLY!")
     except AssertionError as e:
         print("[FAIL] TEST SUITE FAILED ENCOUNTERED ASSERTION ERROR!")

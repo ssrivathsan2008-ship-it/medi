@@ -91,3 +91,26 @@ export const uploadDocument = async (
   });
   return response.data;
 };
+
+export const triggerRedflag = async (
+  sessionId: string,
+  symptom: string,
+  kioskId: string = "Kiosk-01"
+): Promise<any> => {
+  const response = await axios.post(`${API_BASE_URL}/redflag/trigger`, {
+    session_id: sessionId,
+    symptom,
+    kiosk_id: kioskId
+  });
+  return response.data;
+};
+
+export const ackRedflag = async (
+  sessionId: string
+): Promise<any> => {
+  const response = await axios.post(`${API_BASE_URL}/redflag/ack`, {
+    session_id: sessionId
+  });
+  return response.data;
+};
+

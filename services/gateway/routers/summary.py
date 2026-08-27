@@ -22,6 +22,11 @@ class UpdateSessionRequest(BaseModel):
     phone: Optional[str] = None
     vitals: Optional[dict] = None
     allergies: Optional[List[dict]] = None
+    consultType: Optional[str] = None
+    status: Optional[str] = None
+    redflagSymptom: Optional[str] = None
+    ayushDetails: Optional[Dict[str, str]] = None
+
 
 @router.get("/{session_id}")
 async def get_summary(session_id: str):

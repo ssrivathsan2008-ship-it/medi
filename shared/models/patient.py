@@ -62,3 +62,8 @@ class PatientSession(BaseModel):
     timeline: List[TimelineEvent] = Field(default_factory=list)
     documents: List[DocumentRecord] = Field(default_factory=list)
     prescriptions: List[Prescription] = Field(default_factory=list)
+    consultType: str = "allopathic"
+    status: str = "active"
+    redflagSymptom: Optional[str] = None
+    ayushDetails: Dict[str, str] = Field(default_factory=dict)
+

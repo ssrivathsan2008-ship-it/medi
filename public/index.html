@@ -8,15 +8,1735 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&display=swap" rel="stylesheet">
-    <meta property="og:title" content="MediKiosk" />
-    <meta property="og:description" content="An application built with Google AI Studio." />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <script type="module" crossorigin src="/assets/index-Dn-klrAn.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Dh-0Hldz.css">
+    
+    <style>
+      :root {
+        --bg-beige: #F2F0ED;
+        --sidebar-beige: #EBE8E3;
+        --text-dark: #1A1A1A;
+        --text-muted: #5C5852;
+        --primary-orange: #D14D2A;
+        --primary-hover: #B83E1E;
+        --emergency-red: #BA1A1A;
+        --success-green: #34A853;
+      }
+      
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Plus Jakarta Sans', 'Noto Sans', sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-beige);
+        color: var(--text-dark);
+        overflow: hidden;
+        user-select: none;
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Utility classes */
+      .hidden { display: none !important; }
+      .font-serif { font-family: 'Playfair Display', serif; }
+      .font-mono { font-family: monospace; }
+      .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+      .shadow-2xs { box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
+      
+      /* Animation classes */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fadeIn { animation: fadeIn 0.3s ease forwards; }
+
+      @keyframes pulseRed {
+        0%, 100% { border-color: rgba(186, 26, 26, 0.3); background-color: rgba(186, 26, 26, 0.02); }
+        50% { border-color: rgba(186, 26, 26, 0.8); background-color: rgba(186, 26, 26, 0.1); }
+      }
+      .animate-pulse-red { animation: pulseRed 2s infinite; }
+
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+      .animate-bounce { animation: bounce 1s infinite; }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+      }
+      .animate-pulse { animation: pulse 1.5s infinite; }
+
+      /* Layout */
+      header {
+        background-color: var(--text-dark);
+        color: var(--bg-beige);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 40px;
+        height: 64px;
+        width: 100%;
+        z-index: 50;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo-title {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+      }
+      .logo-sub {
+        font-size: 10px;
+        letter-spacing: 0.25em;
+        color: var(--primary-orange);
+        font-weight: 800;
+      }
+      .header-badge {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 4px;
+        border: 1px solid;
+      }
+
+      .header-buttons {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .btn-header {
+        background-color: #2A2A2A;
+        color: white;
+        border: 1px solid rgba(242, 240, 237, 0.2);
+        padding: 6px 14px;
+        border-radius: 9999px;
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-header:hover {
+        background-color: var(--primary-orange);
+        color: white;
+      }
+      .btn-header-active {
+        background-color: var(--primary-orange);
+        color: white;
+      }
+      .btn-header-triage-active {
+        background-color: #DBA226;
+        color: white;
+        border-color: #DBA226;
+      }
+
+      .main-layout {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Sidebar */
+      sidebar {
+        background-color: var(--sidebar-beige);
+        width: 256px;
+        border-right: 1px solid rgba(26,26,26,0.1);
+        display: flex;
+        flex-direction: column;
+        padding: 24px 16px;
+        flex-shrink: 0;
+      }
+      .sidebar-profile {
+        margin-bottom: 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(26,26,26,0.1);
+      }
+      .sidebar-avatar {
+        width: 48px;
+        height: 48px;
+        background-color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-bottom: 12px;
+        border: 1px solid rgba(26,26,26,0.15);
+      }
+      .sidebar-nav {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+      }
+      .nav-item {
+        width: 100%;
+      }
+      .nav-btn {
+        width: 100%;
+        text-align: left;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background-color: transparent;
+        color: var(--text-muted);
+        transition: all 0.2s;
+      }
+      .nav-btn:hover {
+        background-color: #E2DED8;
+      }
+      .nav-btn.active {
+        background-color: var(--text-dark);
+        color: white;
+        border-color: var(--text-dark);
+      }
+      .nav-num {
+        font-family: monospace;
+        font-size: 12px;
+        opacity: 0.8;
+      }
+
+      .btn-emergency {
+        margin-top: auto;
+        height: 48px;
+        background-color: var(--primary-orange);
+        color: white;
+        border: 1px solid var(--primary-hover);
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .btn-emergency:hover {
+        background-color: var(--primary-hover);
+      }
+
+      /* Main Content Container */
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        padding: 40px;
+        position: relative;
+      }
+
+      /* Screens & UI Elements */
+      .screen-container {
+        width: 100%;
+        max-w: 800px;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+      }
+
+      .language-grid {
+        display: grid;
+        grid-template-cols: repeat(2, 1fr);
+        gap: 16px;
+        width: 100%;
+        max-width: 560px;
+      }
+      .language-btn {
+        background-color: white;
+        border: 1px solid rgba(26,26,26,0.1);
+        padding: 20px;
+        border-radius: 12px;
+        cursor: pointer;
+        text-align: left;
+        box-shadow: var(--shadow-2xs);
+        transition: all 0.2s;
+      }
+      .language-btn:hover {
+        border-color: var(--primary-orange);
+        background-color: #FAF8F5;
+        transform: translateY(-2px);
+      }
+      .lang-native { font-size: 18px; font-weight: 800; font-family: 'Playfair Display', serif; }
+      .lang-english { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+      .consult-grid {
+        display: grid;
+        grid-template-cols: repeat(2, 1fr);
+        gap: 24px;
+        width: 100%;
+        max-width: 680px;
+      }
+      .consult-card {
+        background-color: white;
+        border: 1px solid rgba(26,26,26,0.1);
+        padding: 24px;
+        border-radius: 16px;
+        cursor: pointer;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 220px;
+        transition: all 0.2s;
+      }
+      .consult-card:hover {
+        border-color: var(--primary-orange);
+        background-color: #FAF8F5;
+        transform: translateY(-2px);
+      }
+      .consult-title { font-size: 20px; font-weight: 800; font-family: 'Playfair Display', serif; }
+      .consult-desc { font-size: 12px; color: var(--text-muted); margin-top: 8px; line-height: 1.6; }
+      .consult-action { font-size: 12px; font-weight: 700; color: var(--primary-orange); text-transform: uppercase; margin-top: auto; }
+
+      .form-card {
+        background-color: white;
+        border: 1px solid rgba(26,26,26,0.1);
+        padding: 24px;
+        border-radius: 16px;
+        width: 100%;
+        box-shadow: var(--shadow-2xs);
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-group label {
+        display: block;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .form-input {
+        width: 100%;
+        height: 44px;
+        padding: 0 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(26,26,26,0.2);
+        outline: none;
+        font-weight: 600;
+      }
+      .form-input:focus {
+        border-color: var(--primary-orange);
+      }
+      .btn-primary {
+        background-color: var(--text-dark);
+        color: white;
+        border: none;
+        height: 44px;
+        padding: 0 24px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .btn-primary:hover {
+        background-color: var(--primary-orange);
+      }
+
+      /* Converse Screen */
+      .badge-step {
+        font-size: 10px;
+        background-color: rgba(209, 77, 42, 0.1);
+        color: var(--primary-orange);
+        padding: 4px 10px;
+        border-radius: 9999px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        border: 1px solid rgba(209, 77, 42, 0.2);
+      }
+      .audio-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: 1px solid;
+      }
+      .audio-badge-suppression {
+        background-color: rgba(52, 168, 83, 0.1);
+        color: var(--success-green);
+        border-color: rgba(52, 168, 83, 0.2);
+      }
+      .audio-badge-dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--success-green);
+        border-radius: 50%;
+      }
+      .mic-button {
+        width: 144px;
+        height: 144px;
+        border-radius: 50%;
+        background-color: var(--text-dark);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: all 0.2s;
+      }
+      .mic-button.recording {
+        background-color: var(--primary-orange);
+        box-shadow: 0 0 0 8px rgba(209, 77, 42, 0.2);
+        transform: scale(1.05);
+      }
+      .transcript-box {
+        background-color: white;
+        border: 1px solid rgba(26,26,26,0.12);
+        padding: 16px;
+        border-radius: 12px;
+        width: 100%;
+        box-shadow: var(--shadow-2xs);
+      }
+
+      /* Scan screen layouts */
+      .scan-grid {
+        display: grid;
+        grid-template-cols: 1fr 1fr;
+        gap: 24px;
+        width: 100%;
+        max-width: 800px;
+      }
+      .scan-camera {
+        height: 256px;
+        background-color: black;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        border: 2px dashed rgba(209,77,42,0.4);
+        position: relative;
+      }
+
+      /* Emergency Triage screen & lock */
+      .triage-alert-container {
+        width: 100%;
+        max-width: 900px;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding: 24px;
+        border-radius: 24px;
+        transition: all 0.2s;
+      }
+      .triage-card {
+        background-color: white;
+        border: 1px solid rgba(186, 26, 26, 0.3);
+        padding: 24px;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        box-shadow: var(--shadow-2xs);
+      }
+      .alert-redflag-item {
+        background: linear-gradient(to right, #FFF5F5, white);
+        border: 1px solid rgba(186, 26, 26, 0.2);
+        padding: 24px;
+        border-radius: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        box-shadow: var(--shadow-xs);
+      }
+
+      .emergency-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background-color: var(--emergency-red);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 32px;
+        text-align: center;
+      }
+
+      /* Physician Dashboard */
+      .physician-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .profile-card {
+        background-color: white;
+        border: 1px solid rgba(26,26,26,0.1);
+        padding: 20px;
+        border-radius: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: var(--shadow-2xs);
+      }
+      .dashboard-grid {
+        display: grid;
+        grid-template-cols: 7fr 5fr;
+        gap: 24px;
+      }
+      .dashboard-col {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .card-section {
+        background-color: white;
+        border: 1px solid rgba(26,26,26,0.12);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: var(--shadow-2xs);
+      }
+      .card-section-title {
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 12px;
+        border-bottom: 1px solid rgba(26,26,26,0.08);
+        padding-bottom: 6px;
+      }
+      .timeline-container {
+        position: relative;
+        padding-left: 24px;
+        border-left: 1px solid rgba(26,26,26,0.15);
+        margin-left: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -30px;
+        top: 4px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: var(--primary-orange);
+        border: 2px solid white;
+      }
+      .timeline-item {
+        position: relative;
+        font-size: 12px;
+      }
+
+      /* Tables & Lists */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      th {
+        border-bottom: 1px solid rgba(26,26,26,0.1);
+        padding-bottom: 8px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        text-align: left;
+        font-size: 10px;
+        letter-spacing: 0.05em;
+      }
+      td {
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(26,26,26,0.05);
+      }
+
+      /* Modals */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0,0,0,0.6);
+        z-index: 90;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+      .modal-content {
+        background-color: white;
+        border-radius: 16px;
+        padding: 24px;
+        width: 100%;
+        max-width: 460px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .compliance-banner {
+        font-size: 10px;
+        background-color: rgba(52, 168, 83, 0.1);
+        color: var(--success-green);
+        border: 1px solid rgba(52, 168, 83, 0.2);
+        padding: 4px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    
+    <!-- Top Header -->
+    <header>
+      <div class="logo-container">
+        <div class="logo-title">MEDIKIOSK <span class="logo-sub">STUDIO_SYS</span></div>
+        <div id="header-active-badge-physician" class="header-badge hidden font-serif" style="color: var(--primary-orange); background-color: rgba(209,77,42,0.1); border-color: rgba(209,77,42,0.3)">Physician Portal</div>
+        <div id="header-active-badge-triage" class="header-badge hidden font-serif" style="color: #DBA226; background-color: rgba(219,162,38,0.1); border-color: rgba(219,162,38,0.3)">Triage Console</div>
+      </div>
+      <div class="header-buttons">
+        <button id="btn-toggle-triage" class="btn-header" onclick="toggleTriageConsole()">Triage Console</button>
+        <button id="btn-toggle-physician" class="btn-header" onclick="togglePhysicianPortal()">Physician View</button>
+        <button class="btn-header" style="background-color: transparent; border: none;" onclick="openSupportModal()">Call for Assistance</button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <sidebar id="sidebar-nav" class="hidden">
+        <div class="sidebar-profile">
+          <div class="sidebar-avatar">🏥</div>
+          <div style="font-size: 10px; font-weight: 800; color: var(--primary-orange); letter-spacing: 0.2em; margin-bottom: 4px;">PUBLIC HEALTH</div>
+          <h2 id="sidebar-title" class="font-serif" style="font-size: 16px; font-weight: 800;">OPD Registration</h2>
+        </div>
+        <ul class="sidebar-nav">
+          <li class="nav-item"><button id="nav-btn-identify" class="nav-btn active" onclick="navigateKiosk('identify')"><span class="nav-num">01</span><span>Identify</span></button></li>
+          <li class="nav-item"><button id="nav-btn-converse" class="nav-btn" onclick="navigateKiosk('converse')"><span class="nav-num">02</span><span>Converse</span></button></li>
+          <li class="nav-item"><button id="nav-btn-scan" class="nav-btn" onclick="navigateKiosk('scan')"><span class="nav-num">03</span><span>Scan</span></button></li>
+          <li class="nav-item"><button id="nav-btn-summary" class="nav-btn" onclick="navigateKiosk('summary')"><span class="nav-num">04</span><span>Summary</span></button></li>
+        </ul>
+        <button class="btn-emergency" onclick="triggerKioskEmergency()">Emergency Help</button>
+      </sidebar>
+
+      <!-- Main screen views -->
+      <main id="main-content">
+        <!-- Views will be dynamically injected here by Javascript -->
+      </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-container" class="modal-backdrop hidden">
+      <!-- Modal contents injected here -->
+    </div>
+
+    <!-- Emergency priority red-flag full-screen overlay lock -->
+    <div id="emergency-overlay" class="emergency-overlay hidden">
+      <div class="animate-fadeIn" style="max-width: 500px; display: flex; flex-direction: column; gap: 24px; align-items: center;">
+        <div class="animate-bounce" style="width: 96px; height: 96px; border-radius: 50%; background-color: white; color: var(--emergency-red); font-size: 40px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">⚠️</div>
+        <h1 class="font-serif" style="font-size: 32px; font-weight: 800;">Please wait, help is on the way.</h1>
+        <p style="font-size: 18px; font-weight: 500; opacity: 0.9;">An emergency alert has been sent.</p>
+        <p style="font-size: 12px; opacity: 0.75;">Attending medical staff has been notified and is on the way.</p>
+        
+        <div style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 24px; margin-top: 24px; width: 100%; display: flex; flex-direction: column; gap: 6px;">
+          <p class="animate-pulse" style="font-size: 13px; font-weight: 700; letter-spacing: 0.05em; color: white;">🔴 Waiting for Triage Nurse to Acknowledge & Release this Kiosk...</p>
+          <p id="emergency-kiosk-info" class="font-mono" style="font-size: 11px; opacity: 0.6;">Kiosk ID: Kiosk-01 • Session ID: MED-00000</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vanilla Javascript Application Code -->
+    <script>
+      const API_BASE_URL = 'http://localhost:8000';
+      
+      // Global State
+      const state = {
+        screen: 'language', // language, consult_type_select, identify, converse, scan, summary, physician, triage
+        lang: 'en',
+        consultType: 'allopathic', // allopathic, ayush
+        patient: null,
+        isRecording: false,
+        isPushToTalk: false,
+        isSuppressionActive: true,
+        activeAlerts: [],
+        voiceText: '',
+        isSupportOpen: false,
+        isAddingRx: false,
+        isNewRegOpen: false
+      };
+
+      // Language translations dictionary
+      const translations = {
+        en: {
+          appName: "MediKiosk",
+          opdRegistration: "OPD Registration",
+          govtOfIndia: "Government of India",
+          callForAssistance: "Call for Assistance",
+          emergencyHelp: "Emergency Help",
+          selectLanguageTitle: "Please select your preferred language",
+          identifyTitle: "Please identify yourself to begin registration",
+          identifySubtitle: "Select a method below to verify your identity or start a new registration.",
+          enterIdPlaceholder: "Enter 14-digit ID",
+          scanQrCode: "Scan QR Code",
+          scanQrDesc: "Use the kiosk scanner to read your ABHA or local health card QR code.",
+          activateScanner: "Activate Scanner",
+          orDivider: "OR",
+          newPatientTitle: "New Patient Registration",
+          newPatientDesc: "Don't have an ID? Register using your basic details.",
+          startNewRegistration: "Start New Registration",
+          listenToConsent: "Listen to Consent",
+          consentText: "I hereby declare that I am voluntarily sharing my identification details for the purpose of hospital registration and healthcare services.",
+          consentCheckbox: "I agree to the terms and consent to proceed.",
+          docDigitization: "Document Digitization",
+          docDigitizationSubtitle: "Place your prescription under the camera and tap Capture.",
+          capturedStack: "Captured Stack",
+          confirmAll: "CONFIRM ALL",
+          summaryTitle: "Summary Confirmation",
+          summaryText: "You mentioned having a fever for 2 days and stomach pain. You scanned 2 documents. Does this sound right?",
+          fallbackChiefComplaint: "I have had severe pain in my lower right stomach since yesterday night, along with mild fever.",
+          fallbackPastHistory: "I have controlled high blood pressure and type 2 diabetes for 3 years.",
+          fallbackFamilyHistory: "My father had coronary artery disease and mother has hypertension.",
+          fallbackLifestyle: "Non-smoker, vegetarian diet, moderate daily walking."
+        },
+        hi: {
+          appName: "MediKiosk",
+          opdRegistration: "ओपीडी पंजीकरण",
+          govtOfIndia: "भारत सरकार",
+          callForAssistance: "सहायता के लिए कॉल करें",
+          emergencyHelp: "आपातकालीन सहायता",
+          selectLanguageTitle: "कृपया अपनी पसंदीदा भाषा चुनें",
+          identifyTitle: "पंजीकरण शुरू करने के लिए कृपया अपनी पहचान बताएं",
+          identifySubtitle: "अपनी पहचान सत्यापित करने या नया पंजीकरण शुरू करने के लिए नीचे एक विधि चुनें।",
+          enterIdPlaceholder: "14-अंकीय आईडी दर्ज करें",
+          scanQrCode: "क्यूआर कोड स्कैन करें",
+          scanQrDesc: "अपने आभा या स्वास्थ्य कार्ड क्यूआर कोड को पढ़ने के लिए कियोस्क स्कैनर का उपयोग करें।",
+          activateScanner: "स्कैनर सक्रिय करें",
+          orDivider: "या",
+          newPatientTitle: "नया रोगी पंजीकरण",
+          newPatientDesc: "आईडी नहीं है? अपने बुनियादी विवरण का उपयोग करके पंजीकरण करें।",
+          startNewRegistration: "नया पंजीकरण शुरू करें",
+          listenToConsent: "सहमति सुनें",
+          consentText: "मैं घोषणा करता हूँ कि मैं अस्पताल पंजीकरण और स्वास्थ्य सेवाओं के उद्देश्य से स्वेच्छा से अपने पहचान विवरण साझा कर रहा हूँ।",
+          consentCheckbox: "मैं शर्तों से सहमत हूँ और आगे बढ़ने की सहमति देता हूँ।",
+          docDigitization: "दस्तावेज़ डिजिटलीकरण",
+          docDigitizationSubtitle: "अपना नुस्खा कैमरे के नीचे रखें और कैप्चर पर टैप करें।",
+          capturedStack: "कैप्चर किए गए दस्तावेज़",
+          confirmAll: "सभी की पुष्टि करें",
+          summaryTitle: "सारांश पुष्टि",
+          summaryText: "आपने 2 दिनों से बुखार और पेट दर्द का उल्लेख किया है। आपने 2 दस्तावेज़ स्कैन किए हैं। क्या यह सही है?",
+          fallbackChiefComplaint: "मुझे कल रात से पेट के निचले दाहिने हिस्से में तेज दर्द है और साथ में हल्का बुखार भी है।",
+          fallbackPastHistory: "मुझे 3 साल से नियंत्रित उच्च रक्तचाप और टाइप 2 मधुमेह है।",
+          fallbackFamilyHistory: "मेरे पिता को कोरोनरी आर्टरी डिजीज थी और मां को उच्च रक्तचाप है।",
+          fallbackLifestyle: "धूम्रपान नहीं करता, शाकाहारी भोजन, मध्यम दैनिक चलना।"
+        }
+      };
+
+      const languages = [
+        { code: "en", nativeName: "English", englishName: "English" },
+        { code: "hi", nativeName: "हिन्दी", englishName: "Hindi" },
+        { code: "ta", nativeName: "தமிழ்", englishName: "Tamil" },
+        { code: "te", nativeName: "తెలుగు", englishName: "Telugu" },
+        { code: "bn", nativeName: "বাংলা", englishName: "Bengali" },
+        { code: "mr", nativeName: "मराठी", englishName: "Marathi" }
+      ];
+
+      // Audio Synth helper
+      const audioSynth = {
+        playBeep(type) {
+          try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const o = audioCtx.currentTime;
+            const l = audioCtx.createOscillator();
+            const u = audioCtx.createGain();
+            
+            if (type === 'click') {
+              l.frequency.setValueAtTime(800, o);
+              l.frequency.exponentialRampToValueAtTime(400, o + 0.05);
+              u.gain.setValueAtTime(0.1, o);
+              u.gain.exponentialRampToValueAtTime(0.01, o + 0.05);
+              l.connect(u);
+              u.connect(audioCtx.destination);
+              l.start(o);
+              l.stop(o + 0.05);
+            } else if (type === 'success') {
+              l.frequency.setValueAtTime(523.25, o);
+              l.frequency.setValueAtTime(659.25, o + 0.08);
+              l.frequency.setValueAtTime(783.99, o + 0.16);
+              u.gain.setValueAtTime(0.15, o);
+              u.gain.exponentialRampToValueAtTime(0.01, o + 0.3);
+              l.connect(u);
+              u.connect(audioCtx.destination);
+              l.start(o);
+              l.stop(o + 0.3);
+            }
+          } catch(e) {}
+        }
+      };
+
+      // API helpers
+      async function apiCall(url, method = 'GET', data = null) {
+        const config = {
+          method,
+          headers: { 'Content-Type': 'application/json' }
+        };
+        if (data) config.body = JSON.stringify(data);
+        const res = await fetch(`${API_BASE_URL}${url}`, config);
+        if (!res.ok) throw new Error(`API error: ${res.statusText}`);
+        return res.json();
+      }
+
+      // Start session
+      async function startSession(abhaId = null, name = null, age = null, gender = null, phone = null) {
+        return apiCall('/session/start', 'POST', { abhaId, name, age, gender, phone });
+      }
+
+      // Update session
+      async function updateSession(sessionId, updates) {
+        return apiCall(`/summary/${sessionId}`, 'PATCH', updates);
+      }
+
+      // Fetch session
+      async function getSession(sessionId) {
+        return apiCall(`/summary/${sessionId}`, 'GET');
+      }
+
+      // Connect to Redflag WebSocket
+      let ws = null;
+      function connectTriageWebSocket() {
+        try {
+          const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+          const wsHost = window.location.hostname ? `${window.location.hostname}:8000` : 'localhost:8000';
+          ws = new WebSocket(`${wsProtocol}//${wsHost}/redflag/subscribe`);
+          
+          ws.onopen = () => {
+            console.log('Connected to Red-Flag Triage WebSocket');
+            render();
+          };
+          
+          ws.onmessage = (event) => {
+            try {
+              const data = JSON.parse(event.data);
+              if (data.type === 'red_flag_alert') {
+                if (!state.activeAlerts.some(a => a.session_id === data.session_id)) {
+                  state.activeAlerts.push(data);
+                  audioSynth.playBeep('success');
+                  render();
+                }
+              } else if (data.type === 'red_flag_ack') {
+                state.activeAlerts = state.activeAlerts.filter(a => a.session_id !== data.session_id);
+                render();
+              }
+            } catch(e) {}
+          };
+
+          ws.onclose = () => {
+            setTimeout(connectTriageWebSocket, 3000);
+          };
+          
+          ws.onerror = () => {
+            ws.close();
+          };
+        } catch(e) {
+          setTimeout(connectTriageWebSocket, 3000);
+        }
+      }
+
+      // Emergency status checking intervals
+      let emergencyPollInterval = null;
+      function startEmergencyPolling() {
+        if (emergencyPollInterval) clearInterval(emergencyPollInterval);
+        
+        emergencyPollInterval = setInterval(async () => {
+          if (!state.patient) return;
+          try {
+            const updated = await getSession(state.patient.id);
+            if (updated.status === 'acknowledged') {
+              clearInterval(emergencyPollInterval);
+              state.patient = updated;
+              document.getElementById('emergency-overlay').classList.add('hidden');
+              state.screen = 'converse';
+              navigateKiosk('converse');
+            }
+          } catch(e) {}
+        }, 2000);
+      }
+
+      // Actions & navigation
+      function selectLanguage(code) {
+        audioSynth.playBeep('click');
+        state.lang = code;
+        state.screen = 'consult_type_select';
+        render();
+      }
+
+      async function selectConsultType(type) {
+        audioSynth.playBeep('click');
+        state.consultType = type;
+        try {
+          const data = await startSession(null, "John Doe", 45, "Male", "9876543210");
+          state.patient = await updateSession(data.id, { consultType: type });
+          state.screen = 'identify';
+          render();
+        } catch(e) {
+          console.error(e);
+        }
+      }
+
+      async function verifyABHA() {
+        audioSynth.playBeep('click');
+        if (!state.patient) return;
+        state.screen = 'converse';
+        navigateKiosk('converse');
+      }
+
+      async function triggerKioskEmergency() {
+        if (!state.patient) return;
+        audioSynth.playBeep('click');
+        document.getElementById('emergency-kiosk-info').innerText = `Kiosk ID: Kiosk-01 • Session ID: ${state.patient.id}`;
+        document.getElementById('emergency-overlay').classList.remove('hidden');
+        
+        try {
+          await apiCall('/redflag/trigger', 'POST', {
+            session_id: state.patient.id,
+            symptom: 'Emergency Button Pressed on Kiosk Dashboard',
+            kiosk_id: 'Kiosk-01'
+          });
+        } catch(e) {}
+        startEmergencyPolling();
+      }
+
+      async function acknowledgeTriage(sessionId) {
+        audioSynth.playBeep('click');
+        try {
+          await apiCall('/redflag/ack', 'POST', { session_id: sessionId });
+          state.activeAlerts = state.activeAlerts.filter(a => a.session_id !== sessionId);
+          render();
+        } catch(e) {}
+      }
+
+      function toggleTriageConsole() {
+        audioSynth.playBeep('click');
+        state.screen = state.screen === 'triage' ? 'identify' : 'triage';
+        render();
+      }
+
+      function togglePhysicianPortal() {
+        audioSynth.playBeep('click');
+        state.screen = state.screen === 'physician' ? 'identify' : 'physician';
+        render();
+      }
+
+      function navigateKiosk(targetScreen) {
+        audioSynth.playBeep('click');
+        state.screen = targetScreen;
+        
+        // Remove active class from all nav buttons
+        ['identify', 'converse', 'scan', 'summary'].forEach(s => {
+          document.getElementById(`nav-btn-${s}`).classList.remove('active');
+        });
+        
+        // Add active class to target
+        document.getElementById(`nav-btn-${targetScreen}`).classList.add('active');
+        render();
+      }
+
+      // Voice Simulation intake
+      function startVoiceSpeech() {
+        if (state.isRecording) {
+          state.isRecording = false;
+          render();
+          return;
+        }
+        state.isRecording = true;
+        audioSynth.playBeep('click');
+        render();
+
+        setTimeout(async () => {
+          let text = "";
+          const step = state.patient?.currentStep || 1;
+          const tr = translations[state.lang] || translations.en;
+
+          if (state.consultType === 'ayush') {
+            const ayushFallbacks = [
+              "Constitutional body type: Vata-dominant. Shows qualities of dry skin, lighter build, and active mind.",
+              "Currently experiencing Pitta dosha imbalance with stomach heat and acidity.",
+              "Excellent blood and muscle tissue quality (Rakta-Mamsa Sara), healthy complexion.",
+              "Compact and symmetric body build, well-knit joints.",
+              "Body proportions are balanced and symmetric according to standard measurement scales.",
+              "Adaptable to warm weather, light diets, rice, and cooling herbs.",
+              "Strong mental strength, high tolerance to pain and stress, good emotional stability.",
+              "Strong digestive capacity (Agni), consumes two balanced meals daily without discomfort.",
+              "Excellent physical stamina, exercises daily (yoga) with quick recovery.",
+              "Middle age (45 years old), constitutional transition period, symptoms match age profile.",
+              "Follows a balanced vegetarian diet, sleeps 7 hours, works regular shifts."
+            ];
+            text = ayushFallbacks[step - 1] || "No concerns.";
+          } else {
+            if (step === 1) text = tr.fallbackChiefComplaint;
+            else if (step === 2) text = tr.fallbackPastHistory;
+            else if (step === 3) text = tr.fallbackFamilyHistory;
+            else if (step === 4) text = tr.fallbackLifestyle;
+          }
+
+          state.voiceText = text;
+          state.isRecording = false;
+          audioSynth.playBeep('success');
+
+          // Save to backend DB
+          if (state.consultType === 'ayush') {
+            const parameterNames = ["Prakriti", "Vikriti", "Sara", "Samhanana", "Pramana", "Satmya", "Sattva", "Ahara Shakti", "Vyayama Shakti", "Vaya", "Ahara-Vihara"];
+            const param = parameterNames[step - 1];
+            const details = { ...(state.patient.ayushDetails || {}) };
+            details[param] = text;
+            state.patient = await updateSession(state.patient.id, {
+              ayushDetails: details,
+              chiefComplaintDetails: "AYUSH Intake Completed."
+            });
+          } else {
+            if (step === 1) {
+              state.patient = await updateSession(state.patient.id, {
+                symptoms: ["Fever (2 Days)", "Stomach Pain"],
+                chiefComplaintDetails: text
+              });
+            } else if (step === 2) {
+              state.patient = await updateSession(state.patient.id, { pastHistoryDetails: text });
+            } else if (step === 3) {
+              state.patient = await updateSession(state.patient.id, { familyHistoryDetails: text });
+            } else if (step === 4) {
+              state.patient = await updateSession(state.patient.id, { lifestyleDetails: text });
+            }
+          }
+          render();
+        }, 2500);
+      }
+
+      function nextConversationStep() {
+        audioSynth.playBeep('click');
+        const step = state.patient?.currentStep || 1;
+        const max = state.consultType === 'ayush' ? 11 : 4;
+        
+        if (step >= max) {
+          state.screen = 'scan';
+          navigateKiosk('scan');
+        } else {
+          updateSession(state.patient.id, { currentStep: step + 1 }).then(updated => {
+            state.patient = updated;
+            state.voiceText = '';
+            render();
+          });
+        }
+      }
+
+      // Document Capture simulator
+      async function captureDocument() {
+        audioSynth.playBeep('click');
+        const formData = new FormData();
+        formData.append('session_id', state.patient.id);
+        const dummyFile = new Blob(['mock content'], { type: 'application/pdf' });
+        formData.append('file', dummyFile, `Prescription_0${(state.patient.documents?.length || 0) + 1}.pdf`);
+        
+        const res = await fetch(`${API_BASE_URL}/documents/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        
+        state.patient.documents.push(data.document);
+        state.patient.timeline.unshift(data.timelineEvent);
+        audioSynth.playBeep('success');
+        render();
+      }
+
+      // Add Rx
+      async function handleAddPrescription(e) {
+        e.preventDefault();
+        const medicine = document.getElementById('rx-medicine').value;
+        const dosage = document.getElementById('rx-dosage').value;
+        const frequency = document.getElementById('rx-frequency').value;
+        const duration = document.getElementById('rx-duration').value;
+        const instructions = document.getElementById('rx-instructions').value;
+
+        const newRx = {
+          id: `rx-${Date.now()}`,
+          medicine,
+          dosage,
+          frequency,
+          duration,
+          instructions
+        };
+
+        const list = [...(state.patient.prescriptions || []), newRx];
+        state.patient = await updateSession(state.patient.id, { prescriptions: list });
+        state.isAddingRx = false;
+        audioSynth.playBeep('success');
+        render();
+      }
+
+      async function deletePrescription(rxId) {
+        audioSynth.playBeep('click');
+        const list = (state.patient.prescriptions || []).filter(item => item.id !== rxId);
+        state.patient = await updateSession(state.patient.id, { prescriptions: list });
+        render();
+      }
+
+      // Modal helpers
+      function openSupportModal() {
+        audioSynth.playBeep('click');
+        state.isSupportOpen = true;
+        render();
+      }
+      function closeSupportModal() {
+        audioSynth.playBeep('click');
+        state.isSupportOpen = false;
+        render();
+      }
+      function openNewRegModal() {
+        audioSynth.playBeep('click');
+        state.isNewRegOpen = true;
+        render();
+      }
+      function closeNewRegModal() {
+        audioSynth.playBeep('click');
+        state.isNewRegOpen = false;
+        render();
+      }
+      async function handleRegisterNew(e) {
+        e.preventDefault();
+        const name = document.getElementById('reg-name').value;
+        const age = parseInt(document.getElementById('reg-age').value);
+        const gender = document.getElementById('reg-gender').value;
+        const phone = document.getElementById('reg-phone').value;
+
+        try {
+          const data = await startSession(null, name, age, gender, phone);
+          state.patient = await updateSession(data.id, { consultType: state.consultType });
+          state.isNewRegOpen = false;
+          state.screen = 'identify';
+          render();
+        } catch(e) {}
+      }
+
+      // Render view router
+      function render() {
+        const main = document.getElementById('main-content');
+        const sidebar = document.getElementById('sidebar-nav');
+        const badgePhysician = document.getElementById('header-active-badge-physician');
+        const badgeTriage = document.getElementById('header-active-badge-triage');
+        const btnTogglePhysician = document.getElementById('btn-toggle-physician');
+        const btnToggleTriage = document.getElementById('btn-toggle-triage');
+
+        // Toggle active header styles
+        btnTogglePhysician.classList.remove('btn-header-active');
+        btnToggleTriage.classList.remove('btn-header-triage-active');
+        badgePhysician.classList.add('hidden');
+        badgeTriage.classList.add('hidden');
+
+        if (state.screen === 'physician') {
+          btnTogglePhysician.classList.add('btn-header-active');
+          badgePhysician.classList.remove('hidden');
+          sidebar.classList.add('hidden');
+        } else if (state.screen === 'triage') {
+          btnToggleTriage.classList.add('btn-header-triage-active');
+          badgeTriage.classList.remove('hidden');
+          sidebar.classList.add('hidden');
+        } else if (state.screen === 'language' || state.screen === 'consult_type_select') {
+          sidebar.classList.add('hidden');
+        } else {
+          sidebar.classList.remove('hidden');
+        }
+
+        // Render main screen
+        let html = '';
+
+        if (state.screen === 'language') {
+          html = `
+            <div class="screen-container animate-fadeIn" style="margin-top: 80px;">
+              <h1 class="text-2xl md:text-3xl font-bold font-serif mb-4 text-center">Please select your preferred language</h1>
+              <div class="language-grid">
+                ${languages.map(l => `
+                  <button class="language-btn" onclick="selectLanguage('${l.code}')">
+                    <div class="lang-native">${l.nativeName}</div>
+                    <div class="lang-english">${l.englishName}</div>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        else if (state.screen === 'consult_type_select') {
+          html = `
+            <div class="screen-container animate-fadeIn" style="margin-top: 80px;">
+              <h1 class="text-2xl md:text-3xl font-bold font-serif text-center">Select Clinical Intake Mode</h1>
+              <p class="text-xs text-muted text-center" style="margin-top: -12px;">Choose the diagnostic pathway for this session.</p>
+              <div class="consult-grid" style="margin-top: 20px;">
+                <button class="consult-card" onclick="selectConsultType('allopathic')">
+                  <div>
+                    <div class="consult-title text-dark">Allopathic Clinical Intake</div>
+                    <div class="consult-desc">Standard Western medicine pathway focusing on Chief Complaint, Past History, Family History, and Lifestyle.</div>
+                  </div>
+                  <div class="consult-action">Select Pathway →</div>
+                </button>
+                <button class="consult-card" onclick="selectConsultType('ayush')">
+                  <div>
+                    <div class="consult-title" style="color: var(--primary-orange)">AYUSH Ayurveda Intake</div>
+                    <div class="consult-desc">Holistic Ayurvedic pathway capturing all 10 Dashavidha Pariksha parameters (Prakriti, Vikriti, Sara...) and Ahara-Vihara.</div>
+                  </div>
+                  <div class="consult-action">Select Pathway →</div>
+                </button>
+              </div>
+            </div>
+          `;
+        }
+
+        else if (state.screen === 'identify') {
+          html = `
+            <div class="screen-container animate-fadeIn" style="align-items: flex-start; max-width: 680px;">
+              <h1 class="text-2xl md:text-3xl font-bold font-serif">Please identify yourself to begin registration</h1>
+              <p class="text-xs text-muted" style="margin-top: -16px;">Select a method below to verify your identity or start a new registration.</p>
+              
+              <div class="form-card">
+                <h3 class="font-serif text-dark" style="font-size: 16px; font-weight: 800; margin-bottom: 12px;">ABHA Verification</h3>
+                <input type="text" value="${state.patient?.abhaId || '91-4528-9021-0044'}" class="form-input" placeholder="Enter 14-digit ID" />
+                <button class="btn-primary" style="margin-top: 16px;" onclick="verifyABHA()">Verify ABHA ID</button>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 16px; width: 100%;">
+                <div style="height: 1px; background-color: rgba(26,26,26,0.1); flex: 1;"></div>
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 0.15em;">OR</span>
+                <div style="height: 1px; background-color: rgba(26,26,26,0.1); flex: 1;"></div>
+              </div>
+
+              <div class="form-card">
+                <h3 class="font-serif text-dark" style="font-size: 16px; font-weight: 800; margin-bottom: 4px;">New Patient Registration</h3>
+                <p class="text-xs text-muted" style="margin-bottom: 16px;">Don't have an ID? Register using your basic details.</p>
+                <button class="btn-primary" style="background-color: var(--sidebar-beige); color: var(--text-dark); border: 1px solid rgba(26,26,26,0.1);" onclick="openNewRegModal()">Start New Registration</button>
+              </div>
+            </div>
+          `;
+        }
+
+        else if (state.screen === 'converse') {
+          const step = state.patient?.currentStep || 1;
+          const isAyush = state.consultType === 'ayush';
+          const max = isAyush ? 11 : 4;
+          
+          const ayushQuestions = [
+            { param: "Prakriti (Constitution)", q: "What is your constitutional body type or predominant energy (Vata, Pitta, Kapha)?" },
+            { param: "Vikriti (Imbalance)", q: "Are you currently experiencing any digestive or metabolic imbalances?" },
+            { param: "Sara (Tissue Quality)", q: "How would you describe the general quality of your skin, hair, and nails (tissue quality)?" },
+            { param: "Samhanana (Compactness)", q: "How is your overall body build and compactness?" },
+            { param: "Pramana (Proportions)", q: "Are your body proportions normal and symmetric?" },
+            { param: "Satmya (Adaptability)", q: "What foods, climates, or habits are highly suitable for your body?" },
+            { param: "Sattva (Mental Strength)", q: "How do you rate your mental strength and resilience under stress?" },
+            { param: "Ahara Shakti (Digestion)", q: "Describe your appetite and digestion capacity." },
+            { param: "Vyayama Shakti (Physical Energy)", q: "Describe your physical energy and exercise capacity." },
+            { param: "Vaya (Age Factors)", q: "Are your symptoms related to your current stage of life/age?" },
+            { param: "Ahara-Vihara (Diet & Lifestyle)", q: "Describe your daily diet and lifestyle habits." }
+          ];
+
+          const currentQ = isAyush ? ayushQuestions[step - 1] : null;
+
+          html = `
+            <div class="screen-container animate-fadeIn">
+              <div style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <span class="badge-step">
+                  ${isAyush ? `AYUSH Assessment • Step ${step} of 11` : `Allopathic Intake • Step ${step} of 4`}
+                </span>
+                <h1 class="text-2xl md:text-3xl font-bold font-serif text-center" style="margin-top: 8px;">
+                  ${isAyush ? currentQ.param : (
+                    step === 1 ? 'What is your main health concern today?'
+                      : step === 2 ? 'Any Past Medical Conditions?'
+                      : step === 3 ? 'Any Family Health History?'
+                      : 'Lifestyle & Daily Habits'
+                  )}
+                </h1>
+                <p class="text-xs text-muted" style="max-width: 480px; text-align: center; margin-top: 4px; line-height: 1.5;">
+                  ${isAyush ? currentQ.q : 'Please speak clearly or select from the common options below.'}
+                </p>
+              </div>
+
+              <!-- Noise robust indicator bar -->
+              <div style="display: flex; gap: 12px; margin-top: 8px;">
+                <div class="audio-badge audio-badge-suppression shadow-xs">
+                  <span class="audio-badge-dot animate-pulse"></span>
+                  WebRTC RNNoise Active
+                </div>
+                <button onclick="state.isPushToTalk = !state.isPushToTalk; render();" class="audio-badge shadow-xs" style="background-color: ${state.isPushToTalk ? 'rgba(209,77,42,0.1)' : 'white'}; color: ${state.isPushToTalk ? 'var(--primary-orange)' : 'var(--text-muted)'}; border-color: ${state.isPushToTalk ? 'rgba(209,77,42,0.3)' : 'rgba(26,26,26,0.1)'}; cursor: pointer;">
+                  🎚️ Mode: ${state.isPushToTalk ? 'Push-to-Talk' : 'Tap-to-Talk'}
+                </button>
+              </div>
+
+              <button class="mic-button ${state.isRecording ? 'recording' : ''}" 
+                onmousedown="if(state.isPushToTalk) startVoiceSpeech();"
+                onmouseup="if(state.isPushToTalk && state.isRecording) startVoiceSpeech();"
+                onclick="if(!state.isPushToTalk) startVoiceSpeech();"
+              >
+                🎤
+              </button>
+              <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.1em; margin-top: -8px;">
+                ${state.isPushToTalk ? (state.isRecording ? 'Release to Send' : 'Hold to Speak') : (state.isRecording ? 'Listening... (Speak Now)' : 'Tap to Speak')}
+              </span>
+
+              ${state.voiceText ? `
+                <div class="transcript-box animate-fadeIn">
+                  <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Captured Audio Transcript</div>
+                  <p class="font-serif text-dark" style="font-size: 13px; font-style: italic;">"${state.voiceText}"</p>
+                </div>
+              ` : ''}
+
+              <button class="btn-primary" style="background-color: var(--primary-orange); margin-top: 16px;" onclick="nextConversationStep()">Next Step →</button>
+            </div>
+          `;
+        }
+
+        else if (state.screen === 'scan') {
+          html = `
+            <div class="screen-container animate-fadeIn" style="max-width: 900px; align-items: flex-start;">
+              <h1 class="text-2xl md:text-3xl font-bold font-serif">Document Digitization</h1>
+              <p class="text-xs text-muted" style="margin-top: -16px;">Place your prescription under the camera and tap Capture.</p>
+              
+              <div class="scan-grid" style="margin-top: 12px;">
+                <div class="scan-camera">
+                  <span style="font-size: 11px; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 16px; opacity: 0.7;">Align document here</span>
+                  <button class="btn-primary" style="background-color: var(--primary-orange);" onclick="captureDocument()">Capture</button>
+                </div>
+                
+                <div class="form-card" style="display: flex; flex-direction: column; height: 256px;">
+                  <h3 class="font-serif" style="font-size: 14px; font-weight: 800; border-bottom: 1px solid rgba(26,26,26,0.1); padding-bottom: 8px; margin-bottom: 12px;">
+                    Captured Stack (${state.patient?.documents?.length || 0})
+                  </h3>
+                  <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                    ${state.patient?.documents?.map(doc => `
+                      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background-color: #FAF8F5; border: 1px solid rgba(26,26,26,0.08); border-radius: 8px; font-size: 12px; font-weight: 600;">
+                        <span>${doc.name}</span>
+                        <span style="font-size: 9px; background-color: var(--sidebar-beige); color: var(--primary-orange); padding: 2px 6px; border-radius: 4px; font-family: monospace;">OCR Processed</span>
+                      </div>
+                    `).join('') || ''}
+                  </div>
+                  <button class="btn-primary" onclick="state.screen = 'summary'; render();">Confirm All</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        else if (state.screen === 'summary') {
+          html = `
+            <div class="screen-container animate-fadeIn" style="max-width: 600px;">
+              <h1 class="text-2xl md:text-3xl font-bold font-serif">Summary Confirmation</h1>
+              <p class="font-serif text-dark" style="font-size: 15px; font-style: italic; line-height: 1.6; background-color: white; border: 1px solid rgba(26,26,26,0.1); padding: 24px; border-radius: 16px; box-shadow: var(--shadow-2xs);">
+                "${state.consultType === 'ayush' ? 'You completed the Ayurvedic Dashavidha Pariksha assessment. You scanned 2 documents. Does this sound right?' : translations[state.lang].summaryText}"
+              </p>
+              
+              <div style="display: flex; gap: 16px; width: 100%; margin-top: 12px;">
+                <button class="btn-primary" style="flex: 1; background-color: white; border: 1px solid rgba(26,26,26,0.15); color: var(--text-dark);" onclick="state.screen = 'converse'; render();">Edit by Voice</button>
+                <button class="btn-primary" style="flex: 1; background-color: var(--primary-orange);" onclick="state.screen = 'physician'; render();">Confirm & Proceed</button>
+              </div>
+            </div>
+          `;
+        }
+
+        else if (state.screen === 'triage') {
+          const isFlashed = state.activeAlerts.length > 0;
+          html = `
+            <div class="triage-alert-container animate-fadeIn ${isFlashed ? 'animate-pulse-red' : ''}">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(26,26,26,0.1); padding-bottom: 12px; margin-bottom: 12px;">
+                <div>
+                  <h1 class="font-serif" style="font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 12px;">
+                    🚨 Nurse Triage Alert Console
+                  </h1>
+                  <p class="text-xs text-muted" style="margin-top: 4px;">Real-time emergency tracking for OPD Kiosks via WebSockets.</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="width: 10px; height: 10px; border-radius: 50%; background-color: var(--success-green); display: block;" class="animate-pulse"></span>
+                  <span style="font-size: 11px; font-weight: 800; color: var(--success-green); text-transform: uppercase; letter-spacing: 0.05em;">Live Connected</span>
+                </div>
+              </div>
+
+              ${state.activeAlerts.length === 0 ? `
+                <div style="margin: auto; padding: 48px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;">
+                  <span style="font-size: 36px;">✅</span>
+                  <h3 class="font-serif text-dark" style="font-size: 18px; font-weight: 800;">No Active Emergency Alerts</h3>
+                  <p class="text-xs text-muted" style="max-width: 320px;">All kiosks are currently running normal intake sessions.</p>
+                </div>
+              ` : `
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  ${state.activeAlerts.map(alert => `
+                    <div class="alert-redflag-item animate-fadeIn">
+                      <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                          <span style="background-color: var(--emergency-red); color: white; font-family: monospace; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">
+                            ${alert.kiosk_id}
+                          </span>
+                          <span class="text-dark" style="font-size: 14px; font-weight: 800;">Patient: ${alert.patient_name}</span>
+                        </div>
+                        <div class="text-xs text-muted">Session ID: <span class="font-mono text-dark" style="font-weight: 700;">${alert.session_id}</span></div>
+                        <div class="animate-pulse" style="color: var(--emergency-red); font-size: 13px; font-weight: 800; margin-top: 8px; display: flex; align-items: center; gap: 6px;">
+                          ⚠️ Primary Symptom: ${alert.symptom}
+                        </div>
+                      </div>
+                      <button class="btn-primary" style="background-color: var(--emergency-red);" onclick="acknowledgeTriage('${alert.session_id}')">Acknowledge & Release Kiosk</button>
+                    </div>
+                  `).join('')}
+                </div>
+              `}
+            </div>
+          `;
+        }
+
+        else if (state.screen === 'physician') {
+          if (!state.patient) {
+            html = `<div style="text-align: center; margin: auto;">No active patient session.</div>`;
+          } else {
+            const initials = state.patient.name ? state.patient.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2) : 'JD';
+            const isPurged = state.patient.documents?.some(d => d.url.includes("purged"));
+
+            html = `
+              <div class="physician-container animate-fadeIn">
+                <!-- Profile Header card -->
+                <div class="profile-card">
+                  <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background-color: var(--text-dark); color: var(--bg-beige); font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; font-family: monospace;">
+                      ${initials}
+                    </div>
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 12px;">
+                        <h1 class="font-serif" style="font-size: 20px; font-weight: 800;">${state.patient.name}</h1>
+                        <span class="font-mono" style="font-size: 12px; background-color: var(--sidebar-beige); padding: 2px 8px; border-radius: 4px; font-weight: 700;">
+                          ${state.patient.id}
+                        </span>
+                        ${isPurged ? `
+                          <span class="compliance-banner animate-pulse">🔐 DPDP Data Minimized (Raw files purged)</span>
+                        ` : ''}
+                      </div>
+                      <p class="text-xs text-muted" style="margin-top: 4px;">
+                        ${state.patient.gender} • ${state.patient.age} y/o • DOB: ${state.patient.dob} • ABHA: ${state.patient.abhaId}
+                      </p>
+                    </div>
+                  </div>
+                  <button class="btn-primary" style="background-color: var(--primary-orange);" onclick="state.isAddingRx = true; render();">Write Rx</button>
+                </div>
+
+                <div class="dashboard-grid">
+                  <!-- Left Col: Complaints, history, recent investigations, prescriptions -->
+                  <div class="dashboard-col">
+                    
+                    <div class="card-section">
+                      <h2 class="card-section-title">Chief Complaint (Voice Ingestion)</h2>
+                      <p class="font-serif text-muted" style="font-size: 12px; font-style: italic; background-color: #FAF8F5; padding: 12px; border: 1px dashed rgba(26,26,26,0.1); border-radius: 8px;">
+                        "${state.patient.chiefComplaintDetails || 'No complaints logged.'}"
+                      </p>
+                      ${state.patient.symptoms?.length > 0 ? `
+                        <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                          ${state.patient.symptoms.map(s => `<span style="font-size: 10px; font-weight: 800; background-color: var(--sidebar-beige); padding: 4px 10px; border-radius: 9999px; border: 1px solid rgba(26,26,26,0.05);">${s}</span>`).join('')}
+                        </div>
+                      ` : ''}
+                    </div>
+
+                    <div class="card-section">
+                      <h2 class="card-section-title">History of Present Illness (HPI)</h2>
+                      <div class="text-dark" style="font-size: 12px; line-height: 1.6; background-color: #FAF8F5; padding: 12px; border-radius: 8px; border: 1px solid rgba(26,26,26,0.06);">
+                        <p>${state.patient.hpiDetails || (state.consultType === 'ayush' ? 'Patient completed Ayurvedic intake. Standard parameters mapped.' : 'No HPI generated yet.')}</p>
+                        <p style="font-size: 10px; color: var(--text-muted); border-top: 1px solid rgba(26,26,26,0.08); margin-top: 8px; padding-top: 8px; font-weight: 600;">
+                          Transcribed & structured automatically via MediKiosk AI Clinical Ingestion Model.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="card-section">
+                      <h2 class="card-section-title">Recent Investigations</h2>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Test</th>
+                            <th>Result</th>
+                            <th>Ref. Range</th>
+                            <th style="text-align: right">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          ${state.patient.labResults?.map(res => `
+                            <tr>
+                              <td style="font-weight: 700;">${res.test}</td>
+                              <td class="font-mono" style="font-weight: 800; color: var(--primary-orange);">${res.result}</td>
+                              <td style="color: var(--text-muted);">${res.refRange}</td>
+                              <td style="text-align: right; font-weight: 800; text-transform: uppercase;">
+                                <span style="background-color: ${res.status === 'High' ? 'rgba(209,77,42,0.1)' : 'var(--sidebar-beige)'}; color: ${res.status === 'High' ? 'var(--primary-orange)' : 'var(--text-dark)'}; padding: 2px 8px; border-radius: 4px;">
+                                  ${res.status}
+                                </span>
+                              </td>
+                            </tr>
+                          `).join('')}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div class="card-section">
+                      <h2 class="card-section-title">Prescriptions Issued</h2>
+                      <div style="display: flex; flex-direction: column; gap: 8px;">
+                        ${state.patient.prescriptions?.map(rx => `
+                          <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 12px; background-color: #FAF8F5; border: 1px solid rgba(26,26,26,0.06); border-radius: 8px; font-size: 12px;">
+                            <div>
+                              <div style="font-weight: 800;">${rx.medicine} (${rx.dosage})</div>
+                              <div style="color: var(--text-muted); font-size: 11px; margin-top: 2px;">${rx.frequency} • ${rx.duration}</div>
+                              <div style="color: var(--primary-orange); font-weight: 700; font-size: 10px; margin-top: 2px;">Instructions: ${rx.instructions}</div>
+                            </div>
+                            <button onclick="deletePrescription('${rx.id}')" style="background: none; border: none; color: var(--emergency-red); font-weight: 800; cursor: pointer;">Remove</button>
+                          </div>
+                        `).join('') || '<p style="color: var(--text-muted); font-style: italic;">No prescriptions issued yet.</p>'}
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- Right Col: Vitals, Allergies, History & Timeline -->
+                  <div class="dashboard-col">
+                    
+                    <div class="card-section">
+                      <h2 class="card-section-title">Current Vitals</h2>
+                      <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 10px; font-size: 12px;">
+                        ${[
+                          { label: 'TEMP', val: state.patient.vitals?.temp || '98.6 °F', icon: '🌡️' },
+                          { label: 'BP', val: state.patient.vitals?.bp || '120/80', icon: '🩺' },
+                          { label: 'HEART RATE', val: state.patient.vitals?.hr || '72 bpm', icon: '❤️' },
+                          { label: 'SPO2', val: state.patient.vitals?.spo2 || '98%', icon: '🫁' }
+                        ].map(vit => `
+                          <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background-color: #FAF8F5; border: 1px solid rgba(26,26,26,0.06); border-radius: 8px;">
+                            <span style="font-size: 16px;">${vit.icon}</span>
+                            <div>
+                              <div style="font-size: 9px; font-weight: 800; color: var(--text-muted);">${vit.label}</div>
+                              <div class="font-mono" style="font-weight: 800; font-size: 13px; margin-top: 2px;">${vit.val}</div>
+                            </div>
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+
+                    <div class="card-section">
+                      <h2 class="card-section-title">Drug Allergies</h2>
+                      <div style="display: flex; flex-direction: column; gap: 8px;">
+                        ${state.patient.allergies?.map(all => `
+                          <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background-color: #FAF8F5; border: 1px solid rgba(209,77,42,0.2); border-radius: 8px; font-size: 12px;">
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background-color: var(--primary-orange);"></span>
+                            <div>
+                              <span style="font-weight: 800; text-transform: uppercase;">${all.name}</span>
+                              <span style="display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px;">${all.reaction}</span>
+                            </div>
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+
+                    <div class="card-section">
+                      <h2 class="card-section-title">Past Medical & Family History</h2>
+                      <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px;">
+                        <div style="padding: 10px; background-color: #FAF8F5; border-radius: 8px; border: 1px solid rgba(26,26,26,0.06);">
+                          <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: var(--text-dark); display: block; margin-bottom: 2px;">Past Conditions</span>
+                          <p style="color: var(--text-muted); line-height: 1.5;">${state.patient.pastHistoryDetails || 'None reported.'}</p>
+                        </div>
+                        <div style="padding: 10px; background-color: #FAF8F5; border-radius: 8px; border: 1px solid rgba(26,26,26,0.06);">
+                          <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: var(--text-dark); display: block; margin-bottom: 2px;">Family History</span>
+                          <p style="color: var(--text-muted); line-height: 1.5;">${state.patient.familyHistoryDetails || 'None reported.'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Dynamic AYUSH parameters section -->
+                    ${state.consultType === 'ayush' ? `
+                      <div class="card-section animate-fadeIn">
+                        <h2 class="card-section-title" style="color: var(--primary-orange);">AYUSH Dashavidha Pariksha</h2>
+                        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px;">
+                          ${Object.entries(state.patient.ayushDetails || {}).map(([param, val]) => `
+                            <div style="padding: 10px; background-color: #FAF8F5; border-radius: 8px; border: 1px solid rgba(209,77,42,0.15);">
+                              <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: var(--primary-orange); display: block; margin-bottom: 2px;">${param}</span>
+                              <p style="color: var(--text-muted); line-height: 1.5;">${val}</p>
+                            </div>
+                          `).join('')}
+                          ${Object.keys(state.patient.ayushDetails || {}).length === 0 ? `
+                            <p style="color: var(--text-muted); font-style: italic;">No parameters captured.</p>
+                          ` : ''}
+                        </div>
+                      </div>
+                    ` : ''}
+
+                    <div class="card-section">
+                      <h2 class="card-section-title">Document Timeline</h2>
+                      <div class="timeline-container">
+                        ${state.patient.timeline?.map(evt => `
+                          <div class="timeline-item">
+                            <div style="font-size: 9px; font-weight: 800; color: var(--text-muted);">${evt.date}</div>
+                            <div style="font-weight: 850; margin-top: 2px;">
+                              ${isPurged ? `
+                                <span style="text-decoration: line-through; opacity: 0.5;">${evt.title}</span>
+                              ` : evt.title}
+                            </div>
+                            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Type: ${evt.type.toUpperCase()}</div>
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        main.innerHTML = html;
+
+        // Render modals
+        const modal = document.getElementById('modal-container');
+        modal.classList.add('hidden');
+        modal.innerHTML = '';
+
+        if (state.isSupportOpen) {
+          modal.classList.remove('hidden');
+          modal.innerHTML = `
+            <div class="modal-content animate-fadeIn" style="text-align: center; max-width: 360px;">
+              <h3 class="font-serif text-dark" style="font-size: 18px; font-weight: 800;">Call for Assistance</h3>
+              <p class="text-xs text-muted" style="margin-top: -6px; margin-bottom: 8px;">Select the support you require at this kiosk:</p>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                ${['Kiosk Attendant', 'Wheelchair Mobility Assistance', 'Dialect Translator'].map(support => `
+                  <button class="language-btn" style="padding: 12px; font-size: 13px; font-weight: 700; text-align: center;" onclick="closeSupportModal()">
+                    ${support}
+                  </button>
+                `).join('')}
+              </div>
+              <button class="btn-primary" style="background-color: var(--sidebar-beige); color: var(--text-dark); border: 1px solid rgba(26,26,26,0.1); margin-top: 12px;" onclick="closeSupportModal()">Cancel</button>
+            </div>
+          `;
+        }
+
+        else if (state.isNewRegOpen) {
+          modal.classList.remove('hidden');
+          modal.innerHTML = `
+            <div class="modal-content animate-fadeIn" style="max-width: 400px;">
+              <h3 class="font-serif text-dark" style="font-size: 18px; font-weight: 800; border-bottom: 1px solid rgba(26,26,26,0.1); padding-bottom: 8px;">New Patient Registration</h3>
+              <form onsubmit="handleRegisterNew(event)" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+                <div class="form-group">
+                  <label>Full Name</label>
+                  <input type="text" id="reg-name" required class="form-input" placeholder="e.g. Sarah Connor" />
+                </div>
+                <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 12px;">
+                  <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" id="reg-age" value="45" required class="form-input" />
+                  </div>
+                  <div class="form-group">
+                    <label>Gender</label>
+                    <select id="reg-gender" class="form-input" style="padding: 0 8px;">
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Phone Number</label>
+                  <input type="tel" id="reg-phone" value="9876543210" required class="form-input" />
+                </div>
+                <div style="display: flex; gap: 12px; border-top: 1px solid rgba(26,26,26,0.1); padding-top: 16px; margin-top: 8px;">
+                  <button type="button" class="btn-primary" style="flex: 1; background-color: var(--sidebar-beige); color: var(--text-dark); border: 1px solid rgba(26,26,26,0.1);" onclick="closeNewRegModal()">Cancel</button>
+                  <button type="submit" class="btn-primary" style="flex: 1; background-color: var(--primary-orange);">Register</button>
+                </div>
+              </form>
+            </div>
+          `;
+        }
+
+        else if (state.isAddingRx && state.patient) {
+          modal.classList.remove('hidden');
+          modal.innerHTML = `
+            <div class="modal-content animate-fadeIn" style="max-width: 480px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(26,26,26,0.1); padding-bottom: 8px; margin-bottom: 8px;">
+                <div>
+                  <h3 class="font-serif text-dark" style="font-size: 16px; font-weight: 800;">Write Prescription</h3>
+                  <p class="text-xs text-muted" style="margin-top: 2px;">Prescription for ${state.patient.name} (Age ${state.patient.age})</p>
+                </div>
+                <button onclick="state.isAddingRx = false; render();" style="background: none; border: none; font-size: 18px; font-weight: 850; cursor: pointer;">✕</button>
+              </div>
+              
+              <form onsubmit="handleAddPrescription(event)" style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="form-group">
+                  <label>Medicine Name & Composition</label>
+                  <input type="text" id="rx-medicine" required class="form-input" placeholder="e.g. Tab. Amoxicillin / Clavulanate" autofocus />
+                </div>
+                <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 12px;">
+                  <div class="form-group">
+                    <label>Dosage</label>
+                    <input type="text" id="rx-dosage" value="650 mg" class="form-input" />
+                  </div>
+                  <div class="form-group">
+                    <label>Frequency</label>
+                    <select id="rx-frequency" class="form-input" style="padding: 0 8px; font-weight: 600;">
+                      <option value="OD (1-0-0) Once Daily">OD (Once Daily)</option>
+                      <option value="BD (1-0-1) Twice Daily">BD (Twice Daily)</option>
+                      <option value="TDS (1-1-1) 3 Times/Day">TDS (3 Times/Day)</option>
+                      <option value="SOS (As needed)">SOS (As Needed)</option>
+                    </select>
+                  </div>
+                </div>
+                <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 12px;">
+                  <div class="form-group">
+                    <label>Duration</label>
+                    <input type="text" id="rx-duration" value="5 Days" class="form-input" />
+                  </div>
+                  <div class="form-group">
+                    <label>Timing</label>
+                    <input type="text" id="rx-instructions" value="After meals" class="form-input" />
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; border-top: 1px solid rgba(26,26,26,0.1); padding-top: 16px; margin-top: 8px;">
+                  <button type="button" class="btn-primary" style="flex: 1; background-color: var(--sidebar-beige); color: var(--text-dark); border: 1px solid rgba(26,26,26,0.1);" onclick="state.isAddingRx = false; render();">Cancel</button>
+                  <button type="submit" class="btn-primary" style="flex: 1; background-color: var(--primary-orange);">Issue Rx</button>
+                </div>
+              </form>
+            </div>
+          `;
+        }
+      }
+
+      // Initial Mount
+      connectTriageWebSocket();
+      render();
+    </script>
   </body>
 </html>
-
