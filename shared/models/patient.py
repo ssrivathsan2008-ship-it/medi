@@ -66,4 +66,6 @@ class PatientSession(BaseModel):
     status: str = "active"
     redflagSymptom: Optional[str] = None
     ayushDetails: Dict[str, str] = Field(default_factory=dict)
+    consultationSummary: Optional[str] = None
+
 

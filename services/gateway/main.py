@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # Add the root directory to path to allow importing shared models
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-from services.gateway.routers import session, documents, summary
+from services.gateway.routers import session, documents, summary, chatbot
 
 app = FastAPI(
     title="MediKiosk API Gateway (BFF)",
@@ -26,6 +26,7 @@ app.add_middleware(
 app.include_router(session.router)
 app.include_router(documents.router)
 app.include_router(summary.router)
+app.include_router(chatbot.router)
 
 from fastapi import WebSocket, WebSocketDisconnect, HTTPException
 from pydantic import BaseModel

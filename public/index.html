@@ -698,7 +698,17 @@
         voiceText: '',
         isSupportOpen: false,
         isAddingRx: false,
-        isNewRegOpen: false
+        isNewRegOpen: false,
+        
+        // Chatbot state
+        chatbotMessages: [
+          { sender: 'bot', text: "Hello Dr., I am your Clinical Conversation Copilot. I can listen to the consultation and generate a summary, or answer questions about this patient's vitals, allergies, or lab results." }
+        ],
+        chatbotTranscript: '',
+        isChatbotListening: false,
+        summaryDraftText: '',
+        isSummaryRecording: false,
+        summaryVoiceText: ''
       };
 
       // Language translations dictionary
@@ -709,6 +719,8 @@
           govtOfIndia: "Government of India",
           callForAssistance: "Call for Assistance",
           emergencyHelp: "Emergency Help",
+          triageConsole: "Triage Console",
+          physicianView: "Physician View",
           selectLanguageTitle: "Please select your preferred language",
           identifyTitle: "Please identify yourself to begin registration",
           identifySubtitle: "Select a method below to verify your identity or start a new registration.",
@@ -740,6 +752,8 @@
           govtOfIndia: "भारत सरकार",
           callForAssistance: "सहायता के लिए कॉल करें",
           emergencyHelp: "आपातकालीन सहायता",
+          triageConsole: "ट्रीज कंसोल",
+          physicianView: "चिकित्सक दृश्य",
           selectLanguageTitle: "कृपया अपनी पसंदीदा भाषा चुनें",
           identifyTitle: "पंजीकरण शुरू करने के लिए कृपया अपनी पहचान बताएं",
           identifySubtitle: "अपनी पहचान सत्यापित करने या नया पंजीकरण शुरू करने के लिए नीचे एक विधि चुनें।",
@@ -764,6 +778,138 @@
           fallbackPastHistory: "मुझे 3 साल से नियंत्रित उच्च रक्तचाप और टाइप 2 मधुमेह है।",
           fallbackFamilyHistory: "मेरे पिता को कोरोनरी आर्टरी डिजीज थी और मां को उच्च रक्तचाप है।",
           fallbackLifestyle: "धूम्रपान नहीं करता, शाकाहारी भोजन, मध्यम दैनिक चलना।"
+        },
+        ta: {
+          appName: "MediKiosk",
+          opdRegistration: "OPD பதிவு",
+          govtOfIndia: "இந்திய அரசு",
+          callForAssistance: "உதவிக்கு அழைக்கவும்",
+          emergencyHelp: "அவசர உதவி",
+          triageConsole: "ட்ரியாஜ் கன்சோல்",
+          physicianView: "மருத்துவர் பார்வை",
+          selectLanguageTitle: "உங்களுக்கு விருப்பமான மொழியைத் தேர்ந்தெடுக்கவும்",
+          identifyTitle: "பதிவைத் தொடங்க உங்கள் விவரங்களைத் தெரிவிக்கவும்",
+          identifySubtitle: "அடையாளத்தைச் சரிபார்க்க அல்லது புதிய பதிவைத் தொடங்க கீழே உள்ள முறையைத் தேர்ந்தெடுக்கவும்.",
+          enterIdPlaceholder: "14-இலக்க அடையாள எண்ணை உள்ளிடவும்",
+          scanQrCode: "QR குறியீட்டை ஸ்கேன் செய்யவும்",
+          scanQrDesc: "அட்டை அல்லது சுகாதார அட்டை QR குறியீட்டைப் படிக்க கியோஸ்க் ஸ்கேனரைப் பயன்படுத்தவும்.",
+          activateScanner: "ஸ்கேனரை இயக்கவும்",
+          orDivider: "அல்லது",
+          newPatientTitle: "புதிய நோயாளி பதிவு",
+          newPatientDesc: "அடையாள எண் இல்லையா? உங்கள் அடிப்படை விவரங்களைப் பயன்படுத்தி பதிவு செய்யவும்.",
+          startNewRegistration: "புதிய பதிவைத் தொடங்கவும்",
+          listenToConsent: "சம்மதத்தைக் கேளுங்கள்",
+          consentText: "மருத்துவமனை பதிவு மற்றும் சுகாதார சேவைகளின் நோக்கத்திற்காக எனது அடையாள விவரங்களை தானாக முன்வந்து பகிர்ந்து கொள்கிறேன் என்று இதன் மூலம் அறிவிக்கிறேன்.",
+          consentCheckbox: "நான் விதிமுறைகளை ஏற்றுக்கொண்டு தொடர ஒப்புக்கொள்கிறேன்.",
+          docDigitization: "ஆவண டிஜிட்டல்மயமாக்கல்",
+          docDigitizationSubtitle: "உங்கள் மருந்துச் சீட்டை கேமராவின் கீழ் வைத்து பிடி என்பதைக் கிளிக் செய்யவும்.",
+          capturedStack: "பிடிக்கப்பட்ட ஆவணங்கள்",
+          confirmAll: "அனைத்தையும் உறுதிப்படுத்து",
+          summaryTitle: "சுருக்க உறுதிப்படுத்தல்",
+          summaryText: "உங்களுக்கு 2 நாட்களாக காய்ச்சல் மற்றும் வயிற்று வலி இருப்பதாகக் குறிப்பிட்டீர்கள். நீங்கள் 2 ஆவணங்களை ஸ்கேன் செய்துள்ளீர்கள். இது சரியாக இருக்கிறதா?",
+          fallbackChiefComplaint: "நேற்று இரவில் இருந்து என் கீழ் வலது வயிற்றில் கடுமையான வலி உள்ளது, அத்துடன் லேசான காய்ச்சலும் உள்ளது.",
+          fallbackPastHistory: "எனக்கு 3 வருடங்களாக உயர் இரத்த அழுத்தம் மற்றும் வகை 2 நீரிழிவு நோய் கட்டுப்பாட்டில் உள்ளது.",
+          fallbackFamilyHistory: "என் தந்தைக்கு கரோனரி தமனி நோய் இருந்தது மற்றும் தாய்க்கு உயர் இரத்த அழுத்தம் உள்ளது.",
+          fallbackLifestyle: "புகைபிடிக்காதவர், சைவ உணவு, மிதமான தினசரி நடைப்பயிற்சி."
+        },
+        te: {
+          appName: "MediKiosk",
+          opdRegistration: "OPD నమోదు",
+          govtOfIndia: "భారత ప్రభుత్వం",
+          callForAssistance: "సహాయం కోసం కాల్ చేయండి",
+          emergencyHelp: "అత్యవసర సహాయం",
+          triageConsole: "ట్రియాజ్ కన్సోల్",
+          physicianView: "వైద్యుడి వీక్షణ",
+          selectLanguageTitle: "దయచేసి మీ ప్రాధాన్యత భాషను ఎంచుకోండి",
+          identifyTitle: "నమోదును ప్రారంభించడానికి మీ వివరాలను ఎంచుకోండి",
+          identifySubtitle: "గుర్తింపును ధృవీకరించడానికి లేదా కొత్త నమోదును ప్రారంభించడానికి క్రింది పద్ధతిని ఎంచుకోండి.",
+          enterIdPlaceholder: "14-అంకెల ఐడీని నమోదు చేయండి",
+          scanQrCode: "QR కోడ్ స్కాన్ చేయండి",
+          scanQrDesc: "మీ అబ్హా లేదా ఆరోగ్య కార్డ్ QR కోడ్ చదవడానికి కియోస్క్ స్కానర్ ఉపయోగించండి.",
+          activateScanner: "స్కానర్‌ని సక్రియం చేయండి",
+          orDivider: "లేదా",
+          newPatientTitle: "కొత్త రోగి నమోదు",
+          newPatientDesc: "ఐడీ లేదా కార్డు లేదా? మీ ప్రాథమిక వివరాలతో నమోదు చేసుకోండి.",
+          startNewRegistration: "కొత్త నమోదును ప్రారంభించండి",
+          listenToConsent: "సమ్మతిని వినండి",
+          consentText: "ఆసుపత్రి నమోదు మరియు ఆరోగ్య సేవల కొరకు నా గుర్తింపు వివరాలను స్వచ్ఛందంగా పంచుకుంటున్నానని దీని ద్వారా ప్రకటిస్తున్నాను.",
+          consentCheckbox: "నేను నిబంధనలను అంగీకరిస్తున్నాను మరియు కొనసాగడానికి సమ్మతిస్తున్నాను.",
+          docDigitization: "పత్రాల డిజిటలైజేషన్",
+          docDigitizationSubtitle: "మీ ప్రిస్క్రిప్షన్‌ను కెమెరా కింద ఉంచి క్యాప్చర్ పై నొక్కండి.",
+          capturedStack: "క్యాప్చర్ చేసిన పత్రాలు",
+          confirmAll: "అన్నింటినీ ధృవీకరించు",
+          summaryTitle: "సారాంశం ధృవీకరణ",
+          summaryText: "మీరు 2 రోజులుగా జ్వరం మరియు కడుపు నొప్పితో బాధపడుతున్నట్లు పేర్కొన్నారు. మీరు 2 పత్రాలను స్కాన్ చేసారు. ఇది సరైనదేనా?",
+          fallbackChiefComplaint: "నిన్న రాత్రి నుండి నాకు కుడి వైపున కడుపు కింది భాగంలో తీవ్రమైన నొప్పి మరియు స్వల్ప జ్వరం ఉంది.",
+          fallbackPastHistory: "నాకు 3 సంవత్సరాలుగా రక్తపోటు మరియు టైప్ 2 మధుమేహం నియంత్రణలో ఉన్నాయి.",
+          fallbackFamilyHistory: "మా నాన్నగారికి గుండె జబ్బు మరియు అమ్మగారికి రక్తపోటు ఉంది.",
+          fallbackLifestyle: "ధూమపానం చేయరు, శాఖాహారం, ప్రతిరోజూ నడక."
+        },
+        bn: {
+          appName: "MediKiosk",
+          opdRegistration: "ওপিডি নিবন্ধন",
+          govtOfIndia: "ভারত সরকার",
+          callForAssistance: "সহায়তার জন্য কল করুন",
+          emergencyHelp: "জরুরি সহায়তা",
+          triageConsole: "ট্রিয়াজ কনসোল",
+          physicianView: "চিকিত্সক দর্শন",
+          selectLanguageTitle: "অনুগ্রহ করে আপনার পছন্দের ভাষা নির্বাচন করুন",
+          identifyTitle: "নিবন্ধন শুরু করতে অনুগ্রহ করে আপনার পরিচয় দিন",
+          identifySubtitle: "আপনার পরিচয় যাচাই করতে বা নতুন নিবন্ধন শুরু করতে নিচে একটি পদ্ধতি নির্বাচন করুন।",
+          enterIdPlaceholder: "১৪-সংখ্যার আইডি লিখুন",
+          scanQrCode: "কিউআর কোড স্ক্যান করুন",
+          scanQrDesc: "আপনার আভা বা স্বাস্থ্য কার্ড কিউআর কোড পড়তে কিয়স্ক স্ক্যানার ব্যবহার করুন।",
+          activateScanner: "স্ক্যানার সক্রিয় করুন",
+          orDivider: "অথবা",
+          newPatientTitle: "নতুন রোগী নিবন্ধন",
+          newPatientDesc: "আইডি নেই? আপনার মৌলিক বিবরণ ব্যবহার করে নিবন্ধন করুন।",
+          startNewRegistration: "নতুন নিবন্ধন শুরু করুন",
+          listenToConsent: "সম্মতি শুনুন",
+          consentText: "আমি এতদ্বারা ঘোষণা করছি যে আমি স্বেচ্ছায় হাসপাতাল নিবন্ধন এবং স্বাস্থ্য পরিষেবার উদ্দেশ্যে আমার পরিচয় বিবরণ শেয়ার করছি।",
+          consentCheckbox: "আমি শর্তাবলীতে সম্মত এবং এগিয়ে যেতে সম্মতি দিচ্ছি।",
+          docDigitization: "নথি ডিজিটালাইজেশন",
+          docDigitizationSubtitle: "আপনার প্রেসক্রিপশনটি ক্যামেরার নিচে রাখুন এবং ক্যাপচারে আলতো চাপুন।",
+          capturedStack: "ক্যাপচার করা নথি",
+          confirmAll: "সব নিশ্চিত করুন",
+          summaryTitle: "সারসংক্ষেপ নিশ্চিতকরণ",
+          summaryText: "আপনি ২ দিন ধরে জ্বর এবং পেট ব্যথার কথা উল্লেখ করেছেন। আপনি ২টি নথি স্ক্যান করেছেন। এটা কি ঠিক আছে?",
+          fallbackChiefComplaint: "গতকাল রাত থেকে আমার পেটের নিচের ডানদিকে তীব্র ব্যথা এবং সামান্য জ্বর হচ্ছে।",
+          fallbackPastHistory: "আমার ৩ বছর ধরে উচ্চ রক্তচাপ এবং টাইপ ২ ডায়াবেটিস নিয়ন্ত্রণে আছে।",
+          fallbackFamilyHistory: "আমার বাবার করোনারि আর্টারি ডিজিজ ছিল এবং মায়ের উচ্চ রক্তচাপ আছে।",
+          fallbackLifestyle: "ধূমপান করি না, নিরামিষ খাদ্য, প্রতিদিন মাঝারি হাঁটা।"
+        },
+        mr: {
+          appName: "MediKiosk",
+          opdRegistration: "ओपीडी नोंदणी",
+          govtOfIndia: "भारत सरकार",
+          callForAssistance: "मदतीसाठी कॉल करा",
+          emergencyHelp: "आत्त्कालीन मदत",
+          triageConsole: "ट्रायज कन्सोल",
+          physicianView: "वैद्यकीय दृश्य",
+          selectLanguageTitle: "कृपया आपली पसंतीची भाषा निवडा",
+          identifyTitle: "नोंदणी सुरू करण्यासाठी कृपया आपली ओळख निवडा",
+          identifySubtitle: "आपली ओळख सत्यापित करण्यासाठी किंवा नवीन नोंदणी सुरू करण्यासाठी खालील पद्धत निवडा.",
+          enterIdPlaceholder: "१४-अंकी आयडी प्रविष्ट करा",
+          scanQrCode: "क्यूआर कोड स्कॅन करा",
+          scanQrDesc: "तुमचा आभा किंवा आरोग्य कार्ड क्यूआर कोड वाचण्यासाठी कियोस्क स्कॅनर वापरा.",
+          activateScanner: "स्कॅनर सक्रिय करा",
+          orDivider: "किंवा",
+          newPatientTitle: "नवीन रुग्ण नोंदणी",
+          newPatientDesc: "आयडी नाही? आपले मूलभूत तपशील वापरून नोंदणी करा.",
+          startNewRegistration: "नवीन नोंदणी सुरू करा",
+          listenToConsent: "सहमती ऐका",
+          consentText: "मी याद्वारे घोषित करतो की मी रुग्णालयात नोंदणी आणि आरोग्य सेवांच्या उद्देशाने माझे ओळख तपशील स्वेच्छेने सामायिक करत आहे.",
+          consentCheckbox: "मी अटींशी सहमत आहे आणि पुढे जाण्यास सहमती देतो.",
+          docDigitization: "दस्तऐवज डिजिटायझेशन",
+          docDigitizationSubtitle: "तुमचे औषधपत्र कॅमेऱ्याच्या खाली ठेवा आणि कॅप्चरवर टॅप करा.",
+          capturedStack: "कॅप्चर केलेले दस्तऐवज",
+          confirmAll: "सर्व पुष्टी करा",
+          summaryTitle: "सारांश पुष्टीकरण",
+          summaryText: "तुम्ही २ दिवसांपासून ताप आणि पोटदुखीचा उल्लेख केला आहे. तुम्ही २ दस्तऐवज स्कॅन केले आहेत. हे योग्य आहे का?",
+          fallbackChiefComplaint: "मला काल रात्रीपासून उजव्या बाजूला पोटात तीव्र वेदना आणि हलका ताप आहे.",
+          fallbackPastHistory: "मला ३ वर्षांपासून उच्च रक्तदाब आणि टाईप २ मधुमेह नियंत्रणात आहे.",
+          fallbackFamilyHistory: "माझ्या वडिलांना हृदयविकार होता आणि आईला उच्च रक्तदाब आहे.",
+          fallbackLifestyle: "धूम्रपान करत नाही, शाकाहारी आहार, दररोज मध्यम चालणे।"
         }
       };
 
@@ -1181,13 +1327,60 @@
           sidebar.classList.remove('hidden');
         }
 
-        // Render main screen
+        const tr = translations[state.lang] || translations.en;
+        if (state.screen === 'summary' && !state.summaryDraftText) {
+          state.summaryDraftText = state.consultType === 'ayush' 
+            ? 'You completed the Ayurvedic Dashavidha Pariksha assessment. You scanned 2 documents. Does this sound right?' 
+            : tr.summaryText;
+        }
         let html = '';
+        
+        // Dynamic localized strings block
+        const identifyNav = tr.identifyNav || (state.lang === 'hi' ? "पहचान" : state.lang === 'ta' ? "அடையாளம்" : state.lang === 'te' ? "గుర్తింపు" : state.lang === 'bn' ? "পরিচয়" : state.lang === 'mr' ? "ओळख" : "Identify");
+        const converseNav = tr.converseNav || (state.lang === 'hi' ? "वार्तालाप" : state.lang === 'ta' ? "உரையாடல்" : state.lang === 'te' ? "సంభాషణ" : state.lang === 'bn' ? "কথোপকথন" : state.lang === 'mr' ? "संभाषण" : "Converse");
+        const scanNav = tr.scanNav || (state.lang === 'hi' ? "स्कैन" : state.lang === 'ta' ? "ஸ்கேன்" : state.lang === 'te' ? "స్కాన్" : state.lang === 'bn' ? "স্ক্যান" : state.lang === 'mr' ? "स्कॅन" : "Scan");
+        const summaryNav = tr.summaryNav || (state.lang === 'hi' ? "सारांश" : state.lang === 'ta' ? "சுருக்கம்" : state.lang === 'te' ? "సారాంశం" : state.lang === 'bn' ? "সারসংক্ষেপ" : state.lang === 'mr' ? "सारांश" : "Summary");
+        
+        const selectConsultTypeTitle = state.lang === 'hi' ? "क्लिनिकल इनटेक मोड चुनें" : state.lang === 'ta' ? "மருத்துவ உட்கொள்ளல் பயன்முறையைத் தேர்ந்தெடுக்கவும்" : state.lang === 'te' ? "క్లినికల్ ఇన్‌టేక్ మోడ్‌ను ఎంచుకోండి" : state.lang === 'bn' ? "ক্লিনিকাল ইনটেক মোড নির্বাচন করুন" : state.lang === 'mr' ? "क्लिनिकल इनटेक मोड निवडा" : "Select Clinical Intake Mode";
+        const selectConsultTypeSubtitle = state.lang === 'hi' ? "इस सत्र के लिए नैदानिक ​​मार्ग चुनें।" : state.lang === 'ta' ? "இந்த அமர்விற்கான கண்டறியும் வழியைத் தேர்ந்தெடுக்கவும்." : state.lang === 'te' ? "ఈ సెషన్ కోసం రోగనిర్ధారణ మార్గాన్ని ఎంచుకోండి." : state.lang === 'bn' ? "এই সেশনের জন্য ডায়াগনস্টিক পাথওয়ে চয়ন করুন।" : state.lang === 'mr' ? "या सत्रासाठी निदान मार्ग निवडा." : "Choose the diagnostic pathway for this session.";
+        
+        const allopathicIntake = state.lang === 'hi' ? "एलोपैथिक क्लिनिकल इनटेक" : state.lang === 'ta' ? "அலோபதி மருத்துவ உட்கொள்ளல்" : state.lang === 'te' ? "అల్లోపతి క్లినికల్ ఇన్‌టేక్" : state.lang === 'bn' ? "অ্যালোপ্যাথিক ক্লিনিকাল ইনটেক" : state.lang === 'mr' ? "अ‍ॅलोपॅथिक क्लिनिकल इनटेक" : "Allopathic Clinical Intake";
+        const allopathicDesc = state.lang === 'hi' ? "मुख्य शिकायत, पिछला इतिहास, पारिवारिक इतिहास और जीवन शैली पर ध्यान केंद्रित करने वाला मानक पश्चिमी चिकित्सा मार्ग।" : state.lang === 'ta' ? "முக்கிய புகார், கடந்தகால வரலாறு, குடும்ப வரலாறு மற்றும் வாழ்க்கை முறை ஆகியவற்றில் கவனம் செலுத்தும் நிலையான மேற்கத்திய மருத்துவ வழி." : state.lang === 'te' ? "చీఫ్ కంప్లైంట్, గత చరిత్ర, కుటుంబ చరిత్ర మరియు జీవనశैలిపై దృష్టి సారించే ప్రామాణిక పాశ్चात्य వైద్య విధానం." : state.lang === 'bn' ? "প্রধান অভিযোগ, অতীত ইতিহাস, পারিবারিক ইতিহাস এবং জীবনযাত্রার উপর দৃষ্টি নিবদ্ধ করে স্ট্যান্ডার্ড পশ্চিমা চিকিৎসা ব্যবস্থা।" : state.lang === 'mr' ? "मुख्य तक्रार, भूतकाळातील इतिहास, कौटुंबिक इतिहास आणि जीवनशैली यावर लक्ष केंद्रित करणारा मानक पाश्चात्य औषध मार्ग." : "Standard Western medicine pathway focusing on Chief Complaint, Past History, Family History, and Lifestyle.";
+        
+        const ayushIntake = state.lang === 'hi' ? "आयुष आयुर्वेद इनटेक" : state.lang === 'ta' ? "ஆயுஷ் ஆயுர்வேத உட்கொள்ளல்" : state.lang === 'te' ? "ఆయుష్ ఆయుర్వేద ఇన్‌టేక్" : state.lang === 'bn' ? "আয়ুষ আয়ুর্বেদ ইনটেক" : state.lang === 'mr' ? "आयुष आयुर्वेद इनटेक" : "AYUSH Ayurveda Intake";
+        const ayushDesc = state.lang === 'hi' ? "सभी 10 दशविध परीक्षा मापदंडों (प्रकृति, विकृति, सार...) और आहार-विहार को शामिल करने वाला समग्र आयुर्वेदिक मार्ग।" : state.lang === 'ta' ? "அனைத்து 10 தசவித பரீக்ஷா அளவுருக்கள் (பிரகிருதி, விக்ருதி, சாரா...) மற்றும் ஆஹார-விஹாரவை உள்ளடக்கிய முழுமையான ஆயுர்வேத வழி." : state.lang === 'te' ? "అన్ని 10 దశవిధ పరీక్షా పారామితులు (ప్రకృతి, వికృతి, సారా...) మరియు ఆహార-విహారాలను సంగ్రహించే సమగ్ర ఆయుర్వేద మార్గం." : state.lang === 'bn' ? "সমস্ত ১০টি দশবিধ পরীক্ষা পরামিতি (প্রকৃতি, বিকৃতি, সারা...) এবং আহার-বিহারকে অন্তর্ভুক্ত করে সামগ্রিক আয়ুর্বেদিক পথ।" : state.lang === 'mr' ? "सर्व 10 दशविध परीक्षा मापदंड (प्रकृती, विकृती, सारा...) आणि आहार-विहार कॅप्चर करणारा समग्र आयुर्वेदिक मार्ग." : "Holistic Ayurvedic pathway capturing all 10 Dashavidha Pariksha parameters (Prakriti, Vikriti, Sara...) and Ahara-Vihara.";
+        
+        const selectPathway = state.lang === 'hi' ? "मार्ग चुनें →" : state.lang === 'ta' ? "வழியைத் தேர்ந்தெடு →" : state.lang === 'te' ? "మార్గాన్ని ఎంచుకోండి →" : state.lang === 'bn' ? "পথ নির্বাচন করুন →" : state.lang === 'mr' ? "मार्ग निवडा →" : "Select Pathway →";
+        
+        const verifyAbha = state.lang === 'hi' ? "आभा आईडी सत्यापित करें" : state.lang === 'ta' ? "ABHA ID சரிபார்" : state.lang === 'te' ? "ABHA ID ధృవీకరించు" : state.lang === 'bn' ? "ABHA ID যাচাই করুন" : state.lang === 'mr' ? "आभा आयडी सत्यापित करा" : "Verify ABHA ID";
+        
+        const next = state.lang === 'hi' ? "आगे बढ़ें →" : state.lang === 'ta' ? "அடுத்த படி →" : state.lang === 'te' ? "తదుపరి అడుగు →" : state.lang === 'bn' ? "পরবর্তী পদক্ষেপ →" : state.lang === 'mr' ? "पुढील पाऊल →" : "Next Step →";
+        
+        const captureCamera = state.lang === 'hi' ? "कैमरा कैप्चर" : state.lang === 'ta' ? "கேமரா பிடி" : state.lang === 'te' ? "కెమెరా క్యాప్చర్" : state.lang === 'bn' ? "क্যামেরা ক্যাপচার" : state.lang === 'mr' ? "कॅमेरा कॅप्चर" : "Capture Camera";
+        const uploadFile = state.lang === 'hi' ? "फाइल अपलोड" : state.lang === 'ta' ? "கோப்பை பதிவேற்று" : state.lang === 'te' ? "ఫైల్ అప్లోడ్" : state.lang === 'bn' ? "ফাইল আপলোড" : state.lang === 'mr' ? "फाइल अपलोड" : "Upload File";
+        
+        const editByVoice = tr.editByVoice || (state.lang === 'hi' ? "आवाज से संपादित करें" : state.lang === 'ta' ? "குரல் மூலம் திருத்து" : state.lang === 'te' ? "వాయిస్ ద్వారా సవరించు" : state.lang === 'bn' ? "কণ্ঠস্বরের মাধ্যমে সম্পাদনা" : state.lang === 'mr' ? "आवाजाने संपादित करा" : "Edit by Voice");
+        const confirmAndProceed = tr.confirmAndProceed || (state.lang === 'hi' ? "पुष्टि करें और आगे बढ़ें" : state.lang === 'ta' ? "உறுதிசெய்து தொடரவும்" : state.lang === 'te' ? "ధృవీకరించి కొనసాగండి" : state.lang === 'bn' ? "নিশ্চित করুন এবং এগিয়ে যান" : state.lang === 'mr' ? "पुष्टी करा आणि पुढे जा" : "Confirm & Proceed");
+        
+        const chiefComplaint = tr.chiefComplaint || (state.lang === 'hi' ? "मुख्य शिकायत" : state.lang === 'ta' ? "முக்கிய புகார்" : state.lang === 'te' ? "ముఖ్య ఫిర్యాదు" : state.lang === 'bn' ? "প্রধান অভিযোগ" : state.lang === 'mr' ? "मुख्य तक्रार" : "Chief Complaint");
+        const pastHistory = tr.pastHistory || (state.lang === 'hi' ? "चिकित्सा इतिहास" : state.lang === 'ta' ? "கடந்தகால மருத்துவ வரலாறு" : state.lang === 'te' ? "గత వైద్య చరిత్ర" : state.lang === 'bn' ? "অতীত চিকিৎসা ইতিহাস" : state.lang === 'mr' ? "मागील वैद्यकीय इतिहास" : "Past Medical History");
+        const familyHistory = tr.familyHistory || (state.lang === 'hi' ? "पारिवारिक इतिहास" : state.lang === 'ta' ? "குடும்ப வரலாறு" : state.lang === 'te' ? "కుटुంబ చరిత్ర" : state.lang === 'bn' ? "পারিবারিক ইতিহাস" : state.lang === 'mr' ? "कौटुंबिक इतिहास" : "Family History");
+        const lifestyle = tr.lifestyle || (state.lang === 'hi' ? "जीवनशैली और आदतें" : state.lang === 'ta' ? "வாழ்க்கை முறை மற்றும் பழக்கவழக்கங்கள்" : state.lang === 'te' ? "జీవనశైలి & అలవాట్లు" : state.lang === 'bn' ? "জীবনধারা ও অভ্যাস" : state.lang === 'mr' ? "जीवनशैली आणि सवयी" : "Lifestyle & Habits");
+        const healthConcernTitle = tr.healthConcernTitle || (state.lang === 'hi' ? "आज आपकी मुख्य स्वास्थ्य चिंता क्या है?" : state.lang === 'ta' ? "இன்று உங்கள் முக்கிய சுகாதார கவலை என்ன?" : state.lang === 'te' ? "ఈరోజు మీ ప్రధాన ఆరోగ్య సమస్య ఏమిటి?" : state.lang === 'bn' ? "আজ আপনার প্রধান স্বাস্থ্য সমস্যা কি?" : state.lang === 'mr' ? "आज तुमची मुख्य आरोग्य समस्या काय आहे?" : "What is your main health concern today?");
+        const clinicalIntakeSubtitle = state.lang === 'hi' ? "कृपया नीचे दिए गए विकल्पों में से चुनें या स्पष्ट रूप से बोलें।" : state.lang === 'ta' ? "தயவுசெய்து தெளிவாகப் பேசவும் அல்லது கீழே உள்ள பொதுவான விருப்பங்களிலிருந்து தேர்ந்தெடுக்கவும்." : state.lang === 'te' ? "దయచేసి స్పష్టంగా మాట్లాడండి లేదా దిగువన ఉన్న సాధారణ ఎంపికల నుండి ఎంచుకోండి." : state.lang === 'bn' ? "অনুগ্রহ করে পরিষ্কারভাবে কথা বলুন বা নিচের সাধারণ বিকল্পগুলি থেকে নির্বাচন করুন." : state.lang === 'mr' ? "कृपया स्पष्ट बोला किंवा खालील सामान्य पर्यायांमधून निवडा." : "Please speak clearly or select from the common options below.";
+        
+        // Update sidebar and general UI elements dynamically
+        document.getElementById('sidebar-title').innerText = tr.opdRegistration || "OPD Registration";
+        document.getElementById('nav-btn-identify').querySelector('span:last-child').innerText = identifyNav;
+        document.getElementById('nav-btn-converse').querySelector('span:last-child').innerText = converseNav;
+        document.getElementById('nav-btn-scan').querySelector('span:last-child').innerText = scanNav;
+        document.getElementById('nav-btn-summary').querySelector('span:last-child').innerText = summaryNav;
+        document.querySelector('.btn-emergency').innerText = tr.emergencyHelp || "Emergency Help";
 
         if (state.screen === 'language') {
           html = `
             <div class="screen-container animate-fadeIn" style="margin-top: 80px;">
-              <h1 class="text-2xl md:text-3xl font-bold font-serif mb-4 text-center">Please select your preferred language</h1>
+              <h1 class="text-2xl md:text-3xl font-bold font-serif mb-4 text-center">${tr.selectLanguageTitle}</h1>
               <div class="language-grid">
                 ${languages.map(l => `
                   <button class="language-btn" onclick="selectLanguage('${l.code}')">
@@ -1203,22 +1396,22 @@
         else if (state.screen === 'consult_type_select') {
           html = `
             <div class="screen-container animate-fadeIn" style="margin-top: 80px;">
-              <h1 class="text-2xl md:text-3xl font-bold font-serif text-center">Select Clinical Intake Mode</h1>
-              <p class="text-xs text-muted text-center" style="margin-top: -12px;">Choose the diagnostic pathway for this session.</p>
+              <h1 class="text-2xl md:text-3xl font-bold font-serif text-center">${selectConsultTypeTitle}</h1>
+              <p class="text-xs text-muted text-center" style="margin-top: -12px;">${selectConsultTypeSubtitle}</p>
               <div class="consult-grid" style="margin-top: 20px;">
                 <button class="consult-card" onclick="selectConsultType('allopathic')">
                   <div>
-                    <div class="consult-title text-dark">Allopathic Clinical Intake</div>
-                    <div class="consult-desc">Standard Western medicine pathway focusing on Chief Complaint, Past History, Family History, and Lifestyle.</div>
+                    <div class="consult-title text-dark">${allopathicIntake}</div>
+                    <div class="consult-desc">${allopathicDesc}</div>
                   </div>
-                  <div class="consult-action">Select Pathway →</div>
+                  <div class="consult-action">${selectPathway}</div>
                 </button>
                 <button class="consult-card" onclick="selectConsultType('ayush')">
                   <div>
-                    <div class="consult-title" style="color: var(--primary-orange)">AYUSH Ayurveda Intake</div>
-                    <div class="consult-desc">Holistic Ayurvedic pathway capturing all 10 Dashavidha Pariksha parameters (Prakriti, Vikriti, Sara...) and Ahara-Vihara.</div>
+                    <div class="consult-title" style="color: var(--primary-orange)">${ayushIntake}</div>
+                    <div class="consult-desc">${ayushDesc}</div>
                   </div>
-                  <div class="consult-action">Select Pathway →</div>
+                  <div class="consult-action">${selectPathway}</div>
                 </button>
               </div>
             </div>
@@ -1228,25 +1421,25 @@
         else if (state.screen === 'identify') {
           html = `
             <div class="screen-container animate-fadeIn" style="align-items: flex-start; max-width: 680px;">
-              <h1 class="text-2xl md:text-3xl font-bold font-serif">Please identify yourself to begin registration</h1>
-              <p class="text-xs text-muted" style="margin-top: -16px;">Select a method below to verify your identity or start a new registration.</p>
+              <h1 class="text-2xl md:text-3xl font-bold font-serif">${tr.identifyTitle}</h1>
+              <p class="text-xs text-muted" style="margin-top: -16px;">${tr.identifySubtitle}</p>
               
               <div class="form-card">
                 <h3 class="font-serif text-dark" style="font-size: 16px; font-weight: 800; margin-bottom: 12px;">ABHA Verification</h3>
-                <input type="text" value="${state.patient?.abhaId || '91-4528-9021-0044'}" class="form-input" placeholder="Enter 14-digit ID" />
-                <button class="btn-primary" style="margin-top: 16px;" onclick="verifyABHA()">Verify ABHA ID</button>
+                <input type="text" id="identify-abha-id" value="${state.patient?.abhaId || '91-4528-9021-0044'}" class="form-input" placeholder="${tr.enterIdPlaceholder}" />
+                <button class="btn-primary" style="margin-top: 16px;" onclick="verifyABHA()">${verifyAbha}</button>
               </div>
 
               <div style="display: flex; align-items: center; gap: 16px; width: 100%;">
                 <div style="height: 1px; background-color: rgba(26,26,26,0.1); flex: 1;"></div>
-                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 0.15em;">OR</span>
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 0.15em;">${tr.orDivider}</span>
                 <div style="height: 1px; background-color: rgba(26,26,26,0.1); flex: 1;"></div>
               </div>
 
               <div class="form-card">
-                <h3 class="font-serif text-dark" style="font-size: 16px; font-weight: 800; margin-bottom: 4px;">New Patient Registration</h3>
-                <p class="text-xs text-muted" style="margin-bottom: 16px;">Don't have an ID? Register using your basic details.</p>
-                <button class="btn-primary" style="background-color: var(--sidebar-beige); color: var(--text-dark); border: 1px solid rgba(26,26,26,0.1);" onclick="openNewRegModal()">Start New Registration</button>
+                <h3 class="font-serif text-dark" style="font-size: 16px; font-weight: 800; margin-bottom: 4px;">${tr.newPatientTitle}</h3>
+                <p class="text-xs text-muted" style="margin-bottom: 16px;">${tr.newPatientDesc}</p>
+                <button class="btn-primary" style="background-color: var(--sidebar-beige); color: var(--text-dark); border: 1px solid rgba(26,26,26,0.1);" onclick="openNewRegModal()">${tr.startNewRegistration}</button>
               </div>
             </div>
           `;
@@ -1281,14 +1474,17 @@
                 </span>
                 <h1 class="text-2xl md:text-3xl font-bold font-serif text-center" style="margin-top: 8px;">
                   ${isAyush ? currentQ.param : (
-                    step === 1 ? 'What is your main health concern today?'
-                      : step === 2 ? 'Any Past Medical Conditions?'
-                      : step === 3 ? 'Any Family Health History?'
-                      : 'Lifestyle & Daily Habits'
+                    step === 1 ? chiefComplaint
+                      : step === 2 ? pastHistory
+                      : step === 3 ? familyHistory
+                      : lifestyle
                   )}
                 </h1>
                 <p class="text-xs text-muted" style="max-width: 480px; text-align: center; margin-top: 4px; line-height: 1.5;">
-                  ${isAyush ? currentQ.q : 'Please speak clearly or select from the common options below.'}
+                  ${isAyush ? currentQ.q : (
+                    step === 1 ? healthConcernTitle
+                      : clinicalIntakeSubtitle
+                  )}
                 </p>
               </div>
 
@@ -1321,7 +1517,7 @@
                 </div>
               ` : ''}
 
-              <button class="btn-primary" style="background-color: var(--primary-orange); margin-top: 16px;" onclick="nextConversationStep()">Next Step →</button>
+              <button class="btn-primary" style="background-color: var(--primary-orange); margin-top: 16px;" onclick="nextConversationStep()">${next}</button>
             </div>
           `;
         }
@@ -1329,28 +1525,37 @@
         else if (state.screen === 'scan') {
           html = `
             <div class="screen-container animate-fadeIn" style="max-width: 900px; align-items: flex-start;">
-              <h1 class="text-2xl md:text-3xl font-bold font-serif">Document Digitization</h1>
-              <p class="text-xs text-muted" style="margin-top: -16px;">Place your prescription under the camera and tap Capture.</p>
+              <h1 class="text-2xl md:text-3xl font-bold font-serif">${tr.docDigitization}</h1>
+              <p class="text-xs text-muted" style="margin-top: -16px;">${tr.docDigitizationSubtitle}</p>
               
               <div class="scan-grid" style="margin-top: 12px;">
-                <div class="scan-camera">
-                  <span style="font-size: 11px; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 16px; opacity: 0.7;">Align document here</span>
-                  <button class="btn-primary" style="background-color: var(--primary-orange);" onclick="captureDocument()">Capture</button>
+                <div class="scan-camera" style="display: flex; flex-direction: column; gap: 10px; justify-content: center; align-items: center; padding: 20px; height: auto; min-height: 256px;">
+                  <span style="font-size: 11px; font-weight: 800; letter-spacing: 0.1em; opacity: 0.7;">Align document here</span>
+                  <button class="btn-primary" style="background-color: var(--primary-orange); width: 180px; height: 38px;" onclick="captureDocument()">${captureCamera}</button>
+                  <input type="file" id="real-file-upload" accept="text/*,application/pdf,image/*" style="display: none;" onchange="handleRealFileUpload(event)" />
+                  <button class="btn-primary" style="background-color: var(--text-dark); width: 180px; height: 38px; border: 1px solid rgba(255,255,255,0.15);" onclick="document.getElementById('real-file-upload').click()">${uploadFile}</button>
+                  
+                  <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; margin-top: 16px; opacity: 0.6; letter-spacing: 0.05em;">Scan Preset Demos (Extract & Sync)</div>
+                  <div style="display: flex; flex-direction: column; gap: 6px; width: 180px;">
+                    <button class="btn-primary" style="font-size: 9px; height: 26px; background-color: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1);" onclick="captureMockDocumentWithText('WBC_Report.txt', 'Lab Report: Complete Blood Count shows WBC: 12,500 /µL (High)')">📊 Scan Lab (High WBC)</button>
+                    <button class="btn-primary" style="font-size: 9px; height: 26px; background-color: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1);" onclick="captureMockDocumentWithText('Glucose_Report.txt', 'Fasting Blood Glucose: 150 mg/dL (High Sugar)')">📊 Scan Lab (High Glucose)</button>
+                    <button class="btn-primary" style="font-size: 9px; height: 26px; background-color: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1);" onclick="captureMockDocumentWithText('Rx_Metformin.txt', 'Prescription: Take Tab. Metformin 500 mg BD with meals for 30 Days')">💊 Scan Rx (Metformin)</button>
+                  </div>
                 </div>
                 
-                <div class="form-card" style="display: flex; flex-direction: column; height: 256px;">
+                <div class="form-card" style="display: flex; flex-direction: column; height: 340px;">
                   <h3 class="font-serif" style="font-size: 14px; font-weight: 800; border-bottom: 1px solid rgba(26,26,26,0.1); padding-bottom: 8px; margin-bottom: 12px;">
-                    Captured Stack (${state.patient?.documents?.length || 0})
+                    ${tr.capturedStack} (${state.patient?.documents?.length || 0})
                   </h3>
                   <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
                     ${state.patient?.documents?.map(doc => `
-                      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background-color: #FAF8F5; border: 1px solid rgba(26,26,26,0.08); border-radius: 8px; font-size: 12px; font-weight: 600;">
-                        <span>${doc.name}</span>
-                        <span style="font-size: 9px; background-color: var(--sidebar-beige); color: var(--primary-orange); padding: 2px 6px; border-radius: 4px; font-family: monospace;">OCR Processed</span>
+                      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background-color: #FAF8F5; border: 1px solid rgba(26,26,26,0.08); border-radius: 8px; font-size: 11px; font-weight: 600;">
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px;">${doc.name}</span>
+                        <span style="font-size: 9px; background-color: var(--sidebar-beige); color: var(--primary-orange); padding: 2px 6px; border-radius: 4px; font-family: monospace; white-space: nowrap;">OCR Processed</span>
                       </div>
                     `).join('') || ''}
                   </div>
-                  <button class="btn-primary" onclick="state.screen = 'summary'; render();">Confirm All</button>
+                  <button class="btn-primary" onclick="state.screen = 'summary'; render();">${tr.confirmAll}</button>
                 </div>
               </div>
             </div>
@@ -1360,14 +1565,32 @@
         else if (state.screen === 'summary') {
           html = `
             <div class="screen-container animate-fadeIn" style="max-width: 600px;">
-              <h1 class="text-2xl md:text-3xl font-bold font-serif">Summary Confirmation</h1>
-              <p class="font-serif text-dark" style="font-size: 15px; font-style: italic; line-height: 1.6; background-color: white; border: 1px solid rgba(26,26,26,0.1); padding: 24px; border-radius: 16px; box-shadow: var(--shadow-2xs);">
-                "${state.consultType === 'ayush' ? 'You completed the Ayurvedic Dashavidha Pariksha assessment. You scanned 2 documents. Does this sound right?' : translations[state.lang].summaryText}"
-              </p>
+              <h1 class="text-2xl md:text-3xl font-bold font-serif">${tr.summaryTitle}</h1>
+              <p class="text-xs text-muted" style="margin-top: -16px; margin-bottom: 12px; text-align: center;">You can type below to edit, or tap the microphone to dictate additions by voice.</p>
+              
+              <div style="position: relative; width: 100%; margin-bottom: 8px;">
+                <textarea id="summary-draft-textarea" 
+                  style="width: 100%; height: 160px; font-family: inherit; font-size: 14px; line-height: 1.6; border: 1px solid rgba(26,26,26,0.15); border-radius: 16px; padding: 16px 48px 16px 16px; box-shadow: var(--shadow-2xs); resize: none; box-sizing: border-box;"
+                  oninput="state.summaryDraftText = this.value"
+                >${state.summaryDraftText || ''}</textarea>
+                
+                <button class="mic-button ${state.isSummaryRecording ? 'recording' : ''}" 
+                  style="position: absolute; right: 12px; bottom: 12px; width: 34px; height: 34px; font-size: 14px; margin: 0; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-xs); border-radius: 50%; cursor: pointer;"
+                  onclick="toggleSummaryVoice()"
+                >
+                  🎤
+                </button>
+              </div>
+
+              ${state.summaryVoiceText ? `
+                <div style="font-size: 10px; background-color: var(--sidebar-beige); color: var(--primary-orange); padding: 6px 12px; border-radius: 8px; font-weight: 700; width: 100%; box-sizing: border-box; text-align: center; border: 1px solid rgba(209,77,42,0.15); margin-bottom: 12px;">
+                  🎙️ Dictated: "${state.summaryVoiceText}"
+                </div>
+              ` : ''}
               
               <div style="display: flex; gap: 16px; width: 100%; margin-top: 12px;">
-                <button class="btn-primary" style="flex: 1; background-color: white; border: 1px solid rgba(26,26,26,0.15); color: var(--text-dark);" onclick="state.screen = 'converse'; render();">Edit by Voice</button>
-                <button class="btn-primary" style="flex: 1; background-color: var(--primary-orange);" onclick="state.screen = 'physician'; render();">Confirm & Proceed</button>
+                <button class="btn-primary" style="flex: 1; background-color: white; border: 1px solid rgba(26,26,26,0.15); color: var(--text-dark);" onclick="state.summaryDraftText = ''; state.screen = 'converse'; render();">Reset & Redo</button>
+                <button class="btn-primary" style="flex: 1; background-color: var(--primary-orange);" onclick="confirmSummaryAndProceed()">${confirmAndProceed}</button>
               </div>
             </div>
           `;
@@ -1529,6 +1752,43 @@
                   <!-- Right Col: Vitals, Allergies, History & Timeline -->
                   <div class="dashboard-col">
                     
+                    <!-- Collapsible AI Clinical Conversation Copilot -->
+                    <div class="card-section" style="border: 1px solid rgba(209,77,42,0.3); background-color: white;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-bottom: 1px solid rgba(26,26,26,0.1); padding-bottom: 8px; margin-bottom: 8px;">
+                        <h2 class="card-section-title" style="margin: 0; display: flex; align-items: center; gap: 8px; color: var(--primary-orange)">
+                          💬 AI Clinical Copilot
+                        </h2>
+                        <span style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Real-time</span>
+                      </div>
+                      
+                      <!-- Chat history container -->
+                      <div id="chatbot-history" style="height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px; background-color: #FAF8F5; border-radius: 8px; border: 1px solid rgba(26,26,26,0.06); margin-bottom: 8px; font-size: 11px;">
+                        <!-- messages will be rendered dynamically -->
+                      </div>
+
+                      <!-- Listening indicator waveform -->
+                      <div id="chatbot-waveform" class="hidden" style="display: flex; gap: 4px; align-items: center; justify-content: center; height: 16px; margin-bottom: 8px;">
+                        <span style="width: 3px; height: 12px; background-color: var(--primary-orange); border-radius: 9999px; animation: bounce-wave 0.8s infinite ease-in-out;"></span>
+                        <span style="width: 3px; height: 16px; background-color: var(--primary-orange); border-radius: 9999px; animation: bounce-wave 0.8s infinite ease-in-out; animation-delay: 0.15s;"></span>
+                        <span style="width: 3px; height: 10px; background-color: var(--primary-orange); border-radius: 9999px; animation: bounce-wave 0.8s infinite ease-in-out; animation-delay: 0.3s;"></span>
+                        <span style="width: 3px; height: 14px; background-color: var(--primary-orange); border-radius: 9999px; animation: bounce-wave 0.8s infinite ease-in-out; animation-delay: 0.45s;"></span>
+                        <span style="font-size: 9px; font-weight: 800; color: var(--primary-orange); text-transform: uppercase; margin-left: 6px; letter-spacing: 0.05em;">Listening to Dialogue...</span>
+                      </div>
+
+                      <!-- Input and CTA controls -->
+                      <div style="display: flex; gap: 8px; flex-direction: column;">
+                        <div style="display: flex; gap: 8px;">
+                          <input type="text" id="chatbot-input" class="form-input" style="flex: 1; height: 34px; font-size: 11px; padding: 0 10px;" placeholder="Ask AI Copilot about allergies, labs, vitals..." onkeydown="if(event.key === 'Enter') sendChatbotMessage()" />
+                          <button class="btn-primary" style="background-color: var(--primary-orange); width: 60px; height: 34px; padding: 0;" onclick="sendChatbotMessage()">Send</button>
+                        </div>
+                        <div style="display: flex; gap: 8px; border-top: 1px solid rgba(26,26,26,0.08); padding-top: 8px; margin-top: 4px;">
+                          <button id="btn-chatbot-listen" class="btn-primary" style="flex: 1; font-size: 10px; height: 28px; background-color: var(--text-dark);" onclick="toggleChatbotListening()">🎙️ Start Listening</button>
+                          <button class="btn-primary" style="font-size: 10px; height: 28px; background-color: var(--sidebar-beige); color: var(--text-dark); border: 1px solid rgba(26,26,26,0.1);" onclick="simulateConsultationSpeech()">🎬 Simulate Session</button>
+                        </div>
+                        <button id="btn-chatbot-summarize" class="btn-primary hidden" style="font-size: 10px; height: 28px; background-color: var(--primary-orange);" onclick="generateConsultationSummary()">✨ Generate Summary</button>
+                      </div>
+                    </div>
+
                     <div class="card-section">
                       <h2 class="card-section-title">Current Vitals</h2>
                       <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 10px; font-size: 12px;">
@@ -1621,6 +1881,9 @@
         }
 
         main.innerHTML = html;
+        if (state.screen === 'physician') {
+          renderChatbotHistory();
+        }
 
         // Render modals
         const modal = document.getElementById('modal-container');
@@ -1731,6 +1994,291 @@
               </form>
             </div>
           `;
+        }
+      }
+
+      // AI Chatbot Frontend Logic
+      let chatbotRecognition = null;
+      
+      function toggleChatbotListening() {
+        audioSynth.playBeep('click');
+        const btn = document.getElementById('btn-chatbot-listen');
+        const wave = document.getElementById('chatbot-waveform');
+        const sumBtn = document.getElementById('btn-chatbot-summarize');
+
+        if (state.isChatbotListening) {
+          state.isChatbotListening = false;
+          btn.innerText = "🎙️ Start Listening";
+          btn.style.backgroundColor = "var(--text-dark)";
+          wave.classList.add('hidden');
+          if (chatbotRecognition) {
+            chatbotRecognition.stop();
+          }
+          if (state.chatbotTranscript) {
+            sumBtn.classList.remove('hidden');
+            addChatMessage('bot', `Listening paused. Consultation transcript captured. Click 'Generate Summary' to process.`);
+          }
+        } else {
+          state.isChatbotListening = true;
+          btn.innerText = "🛑 Stop Listening";
+          btn.style.backgroundColor = "var(--emergency-red)";
+          wave.classList.remove('hidden');
+          
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          if (SpeechRecognition) {
+            chatbotRecognition = new SpeechRecognition();
+            chatbotRecognition.continuous = true;
+            chatbotRecognition.interimResults = false;
+            const langMap = { en: 'en-IN', hi: 'hi-IN', ta: 'ta-IN', te: 'te-IN', bn: 'bn-IN', mr: 'mr-IN' };
+            chatbotRecognition.lang = langMap[state.lang] || 'en-IN';
+            
+            chatbotRecognition.onresult = (event) => {
+              const text = event.results[event.results.length - 1][0].transcript;
+              state.chatbotTranscript += (state.chatbotTranscript ? " " : "") + text;
+              addChatMessage('doctor', text);
+            };
+            
+            chatbotRecognition.onerror = (e) => {
+              console.error("Speech recognition error", e);
+            };
+            
+            chatbotRecognition.start();
+          } else {
+            addChatMessage('bot', "⚠️ Web Speech API is not supported in this browser. Please use the 'Simulate Session' button to test the conversation capture flow.");
+          }
+        }
+      }
+
+      function simulateConsultationSpeech() {
+        audioSynth.playBeep('click');
+        const simulatedText = "Doctor: Good morning. How can I help you today? Patient: Good morning doctor. I have had a severe sore throat and fever for the last three days. Doctor: Let check throat. Yes, tonsils are swollen. Temperature is 101. I prescribe Amoxicillin 500 mg BD for throat infection, and Paracetamol 650 mg TDS for fever. Patient: Thank you doctor.";
+        state.chatbotTranscript = simulatedText;
+        
+        addChatMessage('doctor', "🎬 [Simulated Session started]");
+        addChatMessage('doctor', simulatedText);
+        addChatMessage('bot', "Consultation simulated! Click 'Generate Summary' to parse with AI NLP and sync results.");
+        
+        const sumBtn = document.getElementById('btn-chatbot-summarize');
+        if (sumBtn) sumBtn.classList.remove('hidden');
+        audioSynth.playBeep('success');
+      }
+
+      async function generateConsultationSummary() {
+        audioSynth.playBeep('click');
+        const sumBtn = document.getElementById('btn-chatbot-summarize');
+        if (sumBtn) sumBtn.classList.add('hidden');
+        
+        addChatMessage('bot', "✨ Running AI summarizer, please wait...");
+        
+        try {
+          const res = await fetch(`${API_BASE_URL}/chatbot/summarize`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              session_id: state.patient.id,
+              transcript: state.chatbotTranscript,
+              lang: state.lang
+            })
+          });
+          
+          if (!res.ok) throw new Error("Summarizer API failed");
+          const data = await res.json();
+          
+          addChatMessage('bot', `✨ **Generated Consultation Summary (${state.lang.toUpperCase()}):**<br/><br/>${data.summary}<br/><br/>*New Prescriptions Extracted:* ${data.added_prescriptions.length > 0 ? data.added_prescriptions.map(p => p.medicine).join(', ') : 'None'}<br/><br/><button class="btn-primary" style="height: 28px; font-size: 10px; padding: 0 10px; background-color: var(--primary-orange);" onclick="saveSummaryToRecord()">💾 Save Summary to Record</button>`);
+          
+          // Store temporary result on window to write back later
+          window.lastExtractedPatient = data.patient;
+          audioSynth.playBeep('success');
+        } catch(e) {
+          console.error(e);
+          addChatMessage('bot', "⚠️ Error generating clinical summary from server.");
+        }
+      }
+
+      async function saveSummaryToRecord() {
+        audioSynth.playBeep('click');
+        if (window.lastExtractedPatient) {
+          state.patient = window.lastExtractedPatient;
+          window.lastExtractedPatient = null;
+          addChatMessage('bot', "✅ Consultation summary successfully added to patient database and prescriptions synced!");
+          audioSynth.playBeep('success');
+          render();
+        }
+      }
+
+      async function sendChatbotMessage() {
+        const input = document.getElementById('chatbot-input');
+        const query = input.value.trim();
+        if (!query) return;
+        
+        input.value = '';
+        audioSynth.playBeep('click');
+        addChatMessage('doctor', query);
+        
+        try {
+          const res = await fetch(`${API_BASE_URL}/chatbot/message`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              session_id: state.patient.id,
+              message: query,
+              transcript: state.chatbotTranscript
+            })
+          });
+          const data = await res.json();
+          addChatMessage('bot', data.reply);
+          audioSynth.playBeep('success');
+        } catch(e) {
+          addChatMessage('bot', "⚠️ Sorry, I encountered an error communicating with the clinical service.");
+        }
+      }
+
+      function addChatMessage(sender, text) {
+        state.chatbotMessages.push({ sender, text });
+        renderChatbotHistory();
+      }
+
+      function renderChatbotHistory() {
+        const container = document.getElementById('chatbot-history');
+        if (!container) return;
+        
+        container.innerHTML = state.chatbotMessages.map(m => {
+          const isBot = m.sender === 'bot';
+          const bg = isBot ? '#FAF8F5' : 'rgba(209,77,42,0.06)';
+          const color = isBot ? 'var(--text-dark)' : 'var(--primary-orange)';
+          const align = isBot ? 'flex-start' : 'flex-end';
+          const border = isBot ? '1px solid rgba(26,26,26,0.08)' : '1px solid rgba(209,77,42,0.2)';
+          const senderName = isBot ? 'AI Copilot' : 'Doctor';
+          
+          return `
+            <div style="align-self: ${align}; max-width: 85%; padding: 8px 12px; background-color: ${bg}; border: ${border}; border-radius: 8px; line-height: 1.4; display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 8px; font-weight: 800; color: ${color}; text-transform: uppercase;">${senderName}</div>
+              <div style="word-break: break-word;">${m.text}</div>
+            </div>
+          `;
+        }).join('');
+        
+        container.scrollTop = container.scrollHeight;
+      }
+
+      // Real File Upload & OCR scanning helpers
+      async function handleRealFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        audioSynth.playBeep('click');
+        
+        const formData = new FormData();
+        formData.append('session_id', state.patient.id);
+        formData.append('file', file);
+        
+        try {
+          const res = await fetch(`${API_BASE_URL}/documents/upload`, {
+            method: 'POST',
+            body: formData
+          });
+          const data = await res.json();
+          
+          state.patient = await getSession(state.patient.id);
+          audioSynth.playBeep('success');
+          render();
+        } catch(e) {
+          console.error("Upload error", e);
+        }
+      }
+
+      async function captureMockDocumentWithText(name, content) {
+        audioSynth.playBeep('click');
+        const formData = new FormData();
+        formData.append('session_id', state.patient.id);
+        const fileBlob = new Blob([content], { type: 'text/plain' });
+        formData.append('file', fileBlob, name);
+        
+        try {
+          const res = await fetch(`${API_BASE_URL}/documents/upload`, {
+            method: 'POST',
+            body: formData
+          });
+          const data = await res.json();
+          
+          state.patient = await getSession(state.patient.id);
+          audioSynth.playBeep('success');
+          render();
+        } catch(e) {
+          console.error("Mock upload error", e);
+        }
+      }
+
+      let summaryRecognition = null;
+      function toggleSummaryVoice() {
+        audioSynth.playBeep('click');
+        
+        if (state.isSummaryRecording) {
+          state.isSummaryRecording = false;
+          if (summaryRecognition) {
+            summaryRecognition.stop();
+          }
+          render();
+        } else {
+          state.isSummaryRecording = true;
+          state.summaryVoiceText = '';
+          render();
+
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          if (SpeechRecognition) {
+            summaryRecognition = new SpeechRecognition();
+            summaryRecognition.continuous = false;
+            summaryRecognition.interimResults = false;
+            const langMap = { en: 'en-IN', hi: 'hi-IN', ta: 'ta-IN', te: 'te-IN', bn: 'bn-IN', mr: 'mr-IN' };
+            summaryRecognition.lang = langMap[state.lang] || 'en-IN';
+            
+            summaryRecognition.onresult = (event) => {
+              const text = event.results[0][0].transcript;
+              state.summaryVoiceText = text;
+              state.summaryDraftText = (state.summaryDraftText || '') + (state.summaryDraftText ? " " : "") + text;
+              audioSynth.playBeep('success');
+              state.isSummaryRecording = false;
+              render();
+            };
+            
+            summaryRecognition.onerror = (e) => {
+              console.error("Speech error", e);
+              state.isSummaryRecording = false;
+              render();
+            };
+            
+            summaryRecognition.onend = () => {
+              state.isSummaryRecording = false;
+              render();
+            };
+
+            summaryRecognition.start();
+          } else {
+            // Simulated voice fallback
+            const fallbackText = "Additionally, the patient has a history of mild asthma.";
+            state.summaryVoiceText = fallbackText;
+            state.summaryDraftText = (state.summaryDraftText || '') + (state.summaryDraftText ? " " : "") + fallbackText;
+            audioSynth.playBeep('success');
+            state.isSummaryRecording = false;
+            render();
+          }
+        }
+      }
+
+      async function confirmSummaryAndProceed() {
+        audioSynth.playBeep('click');
+        try {
+          const updated = await updateSession(state.patient.id, {
+            chiefComplaintDetails: state.summaryDraftText
+          });
+          state.patient = updated;
+          state.summaryDraftText = '';
+          state.summaryVoiceText = '';
+          state.screen = 'physician';
+          render();
+        } catch(e) {
+          console.error("Error saving summary", e);
+          state.screen = 'physician';
+          render();
         }
       }
 
